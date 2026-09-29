@@ -41,31 +41,31 @@ module.exports = class World {
         this.chat_complete = false;
 
         this.gp_kill			= 2;
-		this.gold_kill			= 2300;
+		this.gold_kill			= 300;
 		
-        this.gpDoubleKill		= 5;
-		this.goldDoubleKill		= 500;
+        this.gpDoubleKill		= 3;
+		this.goldDoubleKill		= 200;
 		
-        this.gpTripleKill		= 7;
-        this.goldTripleKill		= 999;
+        this.gpTripleKill		= 4;
+        this.goldTripleKill		= 300;
 
-		this.gpTeamKill			= -4;
-		this.goldTeamKill		= -2000;
+		this.gpTeamKill			= -2;
+		this.goldTeamKill		= -500;
         
-        this.gold_good			= 50;
-        this.gold_excellent		= 100;
+        this.gold_good			= 30;
+        this.gold_excellent		= 60;
 
-        this.gp_lose			= 3;
-        this.gold_lose			= 250;
+        this.gp_lose			= 1;
+        this.gold_lose			= 100;
            
-        this.gold_penalty		= -250;
+        this.gold_penalty		= -100;
         this.gp_penalty			= -1;
         
         this.gp_bunge_bonus		= 2;
-        this.gold_bunge_bonus	= 2300;
+        this.gold_bunge_bonus	= 300;
         
         this.gp_bunge_penalty	= -2;
-		this.gold_bunge_penalty	= -250;
+		this.gold_bunge_penalty	= -100;
 
 		this.gpHighAngle		= 0;
 		this.goldHighAngle		= 50;
@@ -74,154 +74,60 @@ module.exports = class World {
 		this.goldUltraHighAngle	= 100;
 
 		this.gpDamage1000		= 1;
-		this.goldDamage1000		= 1000;
+		this.goldDamage1000		= 150;
 
 		this.gpDamage2000		= 2;
-		this.goldDamage2000		= 2000;
+		this.goldDamage2000		= 300;
 
-		this.gpDamage3000		= 4;
-		this.goldDamage3000		= 3000;
-
-		this.gp
-		this.gold
+		this.gpDamage3000		= 3;
+		this.goldDamage3000		= 500;
 
 		this.recetBonos();
         
-        /*this.team_a_gp = 10;
-        this.team_a_count = 1000;
-        this.team_b_gp = 12;
-        this.team_b_count = 1200;
-        this.team_bots_count = 13;*/
-        
         if (gameserver.evento200 === true) {
-            this.gp_kill = 74;
-            this.gold_kill = 4600;
-            
-            this.gold_good = 100;
-            this.gold_excellent = 200;
-        
-            this.gp_lose = -6;
-            this.gold_lose = 500;
-       
-            this.gold_penalty = -500;
-            this.gp_penalty = -2;
-        
-            this.gp_bunge_bonus = 4;
-            this.gold_bunge_bonus = 4600;
-        
-            this.gp_bunge_penalty = -103;
-            this.gold_bunge_penalty = -500;
-            //============[BUNGE]============*/
-        }
-
-        if (this.game.room.game_mode === Types.GAME_MODE.BOSS && gameserver.evento200 === false) {
-            this.gp_kill = 28;
-            this.gold_kill = 2300;
-            
+            this.gp_kill = 4;
+            this.gold_kill = 600;
             this.gold_good = 50;
             this.gold_excellent = 100;
-
-            this.gp_lose = -3;
-            this.gold_lose = 250;
-           
-            this.gold_penalty = -250;
-            this.gp_penalty = -3;
-        
+            this.gp_lose = 2;
+            this.gold_lose = 200;
+            this.gold_penalty = -200;
+            this.gp_penalty = -1;
             this.gp_bunge_bonus = 3;
-            this.gold_bunge_bonus = 2300;
-        
-            this.gp_bunge_penalty = -90;
-            this.gold_bunge_penalty = -220;
-            //============[BUNGE]============*/
+            this.gold_bunge_bonus = 600;
+            this.gp_bunge_penalty = -2;
+            this.gold_bunge_penalty = -200;
+        }
+
+        if (this.game.room.game_mode === Types.GAME_MODE.BOSS) {
+            this.gp_kill = 2;
+            this.gold_kill = 300;
+            this.gold_good = 30;
+            this.gold_excellent = 60;
+            this.gp_lose = 1;
+            this.gold_lose = 100;
+            this.gold_penalty = -100;
+            this.gp_penalty = -1;
+            this.gp_bunge_bonus = 2;
+            this.gold_bunge_bonus = 300;
+            this.gp_bunge_penalty = -2;
+            this.gold_bunge_penalty = -100;
         }
         
-        if (this.game.room.game_mode === Types.GAME_MODE.BOSS && gameserver.evento200 === true) {
-            this.gp_kill = 64;
-            this.gold_kill = 4600;
-            
+        if (gameserver.evento500 === true) {
+            this.gp_kill = 8;
+            this.gold_kill = 1200;
             this.gold_good = 100;
             this.gold_excellent = 200;
-
-            this.gp_lose = -6;
-            this.gold_lose = 500;
-          
-            this.gold_penalty = -500;
-            this.gp_penalty = -6;
-        
+            this.gp_lose = 3;
+            this.gold_lose = 300;
+            this.gold_penalty = -200;
+            this.gp_penalty = -2;
             this.gp_bunge_bonus = 6;
-            this.gold_bunge_bonus = 4600;
-        
-            this.gp_bunge_penalty = -105;
-            this.gold_bunge_penalty = -440;
-            //============[BUNGE]============*/
+            this.gold_bunge_bonus = 1200;
+            this.gp_bunge_penalty = -4;
+            this.gold_bunge_penalty = -300;
         }
-        //===========================================/
-        if (gameserver.evento500 === true) {
-            this.gp_kill = 25;
-            this.gold_kill = 12500;
-
-
-            this.gold_good = 250;
-            this.gold_excellent = 500;
-
-            this.gp_lose = 25;
-            this.gold_lose = 100;
-          
-            this.gold_penalty = -250;
-            this.gp_penalty = -5;
-        
-            this.gp_bunge_bonus = 25;
-            this.gold_bunge_bonus = 5000;
-        
-            this.gp_bunge_penalty = -75;
-           this.gold_bunge_penalty = -25000;
-            //============[BUNGE]============*/
-            
-        }
-
-        if (this.game.room.game_mode === Types.GAME_MODE.BOSS && gameserver.evento500 === true) {
-            this.gp_kill = 15;
-            this.gold_kill = 11500;
-
-
-            this.gold_good = 250;
-            this.gold_excellent = 500;
-
-            this.gp_lose = 15;
-            this.gold_lose = 50;
-          
-            this.gold_penalty = -250;
-            this.gp_penalty = -5;
-        
-            this.gp_bunge_bonus = 75;
-            this.gold_bunge_bonus = 4000;
-        
-            this.gp_bunge_penalty = -75;
-            this.gold_bunge_penalty = -25000;
-            //============[BUNGE]============*/
-        }
-		
-		if (this.game.room.game_mode === Types.GAME_MODE.BOSS && gameserver.roomGPS === true) {
-			if (game.room.id < 5) {
-				this.gp_kill = 82;
-				this.gold_excellent = 4800;
-				
-                this.gold_good = 100;
-                this.gold_excellent = 200;
-
-                this.gp_lose = -8;
-                this.gold_lose = 500;
-          
-                this.gold_penalty = -500;
-                this.gp_penalty = -6;
-        
-                this.gp_bunge_bonus = 25;
-                this.gold_bunge_bonus = 4700;
-        
-                this.gp_bunge_penalty = -105;
-                this.gold_bunge_penalty = -440;
-			}
-		}
     }
 
     start() {

@@ -483,13 +483,15 @@ module.exports = class Room {
                                         }
                                     }
 								}
-								self.win_team_gp = self.team_b_count==1 ? 34 :self.team_b_count==2 ? 56 : self.team_b_count==3 ? 68 : self.team_b_count==4 ? 70 : 0;
+								// Base GP por victoria de equipo (1v1: 4 GP, 2v2: 6 GP, 3v3: 8 GP, 4v4: 10 GP)
+								self.win_team_gp = self.team_b_count==1 ? 4 : self.team_b_count==2 ? 6 : self.team_b_count==3 ? 8 : self.team_b_count>=4 ? 10 : 3;
 								if (self.gameserver.evento200 === true || self.event_game_room === 1)
 									self.win_team_gp *= 2;
 								if (self.no_bonus_user)
 									self.win_team_gp = parseInt(Math.abs(self.win_team_gp / 100));
 								
-								self.win_team_gpb = self.team_bots_count==1 ? 29 :self.team_bots_count==2 ? 42 : self.team_bots_count==3 ? 52 : self.team_bots_count==4 ? 62 : 0;
+								// Base GP por victoria contra bots (1 bot: 2 GP, 2 bots: 3 GP, 3 bots: 4 GP, 4 bots: 5 GP)
+								self.win_team_gpb = self.team_bots_count==1 ? 2 : self.team_bots_count==2 ? 3 : self.team_bots_count==3 ? 4 : self.team_bots_count>=4 ? 5 : 0;
 								if (self.gameserver.evento200 === true || self.event_game_room === 1)
 									self.win_team_gpb *= 2;
 								self.turn_list.push({

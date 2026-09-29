@@ -32,7 +32,7 @@ module.exports = class GameServer {
         this.mapControl = null;
         this.server_type = this.server_options[2];
         this.server_subtype = this.server_options[3];
-		this.roomGPS = true;
+		this.roomGPS = false;
 
         this.onAccountConnect(function (account) {
             account.send([Types.SERVER_OPCODE.hi, this.ver, this.name, this.server_type, this.server_subtype]);

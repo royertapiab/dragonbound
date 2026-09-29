@@ -23069,7 +23069,6 @@
         c.PlayAnim("item", !0);
         this.CreateExplode(EXPLODE.USEITEM, c.x, c.y);
         AudioPlay(AUDIO_USE_ITEM);
-        AudioPlay(AUDIO_BBP_PETSKILL)
         }
         ;
         DangerBound.prototype.CreateExplode = function(a, b, c) {
