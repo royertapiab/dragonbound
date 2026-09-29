@@ -1,3 +1,4 @@
+require('dotenv').config();
 var fs = require('fs');
 var ws = require('./game/lib/ws');
 var DataBase = require('./game/database');

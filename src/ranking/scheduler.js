@@ -1,3 +1,4 @@
+require('dotenv').config();
 const cron = require('node-cron');
 const path = require('path');
 const { runUpdates } = require('./rankingscript');

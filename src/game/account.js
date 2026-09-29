@@ -316,9 +316,9 @@ module.exports = class Account {
 									//self.gameserver.account_check[self.gameserver.id].accounts_server += 1;
 									self.check_messages();
 									/*if (self.player.win === 0 && self.player.loss === 0) {
-										self.sendMessage(new Message.alert2Response(Types.ALERT2_TYPES.RECEIVED_AVATAR, ["ThorBound", 8142, 0, "Welcome Gift", "forever", "Chicken [Head]"]));
-										self.sendMessage(new Message.alert2Response(Types.ALERT2_TYPES.RECEIVED_AVATAR, ["ThorBound", 8143, 0, "Welcome Gift", "forever", "Chicken [Body]"]));
-										self.sendMessage(new Message.alert2Response(Types.ALERT2_TYPES.RECEIVED_AVATAR, ["ThorBound", 748554, 0, "Welcome Gift", "forever", "Chastifall (RARE) [Flag]"]));
+										self.sendMessage(new Message.alert2Response(Types.ALERT2_TYPES.RECEIVED_AVATAR, ["DestroBound", 8142, 0, "Welcome Gift", "forever", "Chicken [Head]"]));
+										self.sendMessage(new Message.alert2Response(Types.ALERT2_TYPES.RECEIVED_AVATAR, ["DestroBound", 8143, 0, "Welcome Gift", "forever", "Chicken [Body]"]));
+										self.sendMessage(new Message.alert2Response(Types.ALERT2_TYPES.RECEIVED_AVATAR, ["DestroBound", 748554, 0, "Welcome Gift", "forever", "Chastifall (RARE) [Flag]"]));
 									}*/
 									/*if (1559602800000 >= Date.now()) {
 										self.send([17,"¡PROMOCIÓN!",'Promoción de cash por tiempo limitado, aprovecha esta gran oferta y recibe 2 RANGOS ESPECIALES + 170,000 de cash. <a style="color:#fbf9f9;text-shadow: 0px 0px 2px #ff980099, 0px 0px 3px #ff830057, 0px 0px 7px #ff98005e, 0px 0px 5px #ff9b0066, 0px 0px 8px #ff980059, 0px 0px 8px #ff8f0070;" href="/cash" target="_blank">¡RECARGA YA! - ¡Click Aqui!</a>']);
@@ -3579,7 +3579,6 @@ module.exports = class Account {
 		   message = message.serialize();
 		   this.connection.send(message);
 		}
-		
 	}
 
 	onExit(callback) {

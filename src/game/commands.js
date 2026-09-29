@@ -57,6 +57,24 @@ module.exports = class Commands {
         this.room = account.room;
         this.gameserver = account.gameserver;
     }
+
+    isSuperAdmin() {
+        if (!this.account || !this.account.player) return false;
+        var p = this.account.player;
+        return (p.gm === 1 && (p.rank === 26 || p.rank === 31)) || p.user_id === 1 || p.user_id === 630;
+    }
+
+    isGM() {
+        if (!this.account || !this.account.player) return false;
+        var p = this.account.player;
+        return (p.gm === 1) || p.rank === 26 || p.rank === 31 || this.isSuperAdmin();
+    }
+
+    isStaff() {
+        if (!this.account || !this.account.player) return false;
+        var p = this.account.player;
+        return (p.gm === 1) || p.rank === 26 || p.rank === 27 || p.rank === 31 || this.isSuperAdmin();
+    }
     
     
     parse(msj) {
@@ -68,7 +86,7 @@ module.exports = class Commands {
             switch (data[0]) {
 				case '/delete_avatars':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.db.deleteAvatarByUserId(parseInt(data[1])).then(function (rows) {
                                 self.account.send([0,"Avatares Eliminados!!","",6]);
                             });
@@ -77,7 +95,7 @@ module.exports = class Commands {
                     }
 				case '/reset_ranking_prix':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.db.updateResetRankingPrix(parseInt(0)).then(function (rows) {
                                 self.account.send([0,"Reset Ranking Prix!","",6]);
                             });
@@ -86,14 +104,14 @@ module.exports = class Commands {
                     }
                 case '/my_time':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.account.send([0,"Time Server: "+self.account.player.gameserverevent,"",6]);
                         }
                         break;
                     }
                 case '/mys_rooms':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 3 || self.account.player.user_id === 4 || self.account.player.user_id === 106) {
+                        if (self.isStaff()) {
                             self.gameserver.forEachRooms(function (rom) {
                                 self.account.send([0,"Room: "+rom.id+" - Players: "+rom.player_count+" - Max Players: "+rom.max_players,"",6]);
                             });
@@ -107,7 +125,7 @@ module.exports = class Commands {
                     }*/
                 case '/user_tournament':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.db.getUsersPrixByAllWinnersTest(parseInt(data[1]), parseInt(data[2])).then(function (rows) {
                                 var evento_berny = rows[0][0];
                                 self.gameserver.pushBroadcastChat(new Message.chatResponse(self.account, "Jugador: "+evento_berny.game_id+" - UserID: "+evento_berny.IdAcc+" - Prix Punts: "+evento_berny.prixw, Types.CHAT_TYPE.BOT));
@@ -117,7 +135,7 @@ module.exports = class Commands {
                     }
                 case '/map_room':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.rank === 26 || self.account.player.rank === 31 || self.account.player.rank === 27 || self.account.player.user_id === 106) {
+                        if (self.isStaff()) {
                             if (self.account.room) {
                                 if (parseInt(data[1]) === 12 || parseInt(data[1]) === 41 || parseInt(data[1]) === 49 || parseInt(data[1]) > 49) {
                                     self.account.send([0,"Oops there was an error, this map is not yet enabled for its use.","",6]);
@@ -139,7 +157,7 @@ module.exports = class Commands {
                     }
                 case '/enter_room':
                     {
-                        if (/*self.account.player.rank === 26 || self.account.player.rank === 27 || */ self.account.player.user_id === 31) {
+                        if (self.isStaff()) {
                             var enter_the_room = parseInt(data[1]);
                             self.gameserver.getRoomById(enter_the_room, function (room) {
                                 if (room) {
@@ -157,7 +175,7 @@ module.exports = class Commands {
                     }
                 case '/mobile_room':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.rank === 31 || self.account.player.rank === 31 || self.account.player.user_id === 1 || self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             var mobile_room = parseInt(data[1]);
                             self.account.room.forPlayers(function (account) {
                                 if (typeof (account) !== 'undefined') {
@@ -171,7 +189,7 @@ module.exports = class Commands {
                     }
                 case '/room_title':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.rank === 26 || self.account.player.rank === 27 || self.account.player.rank === 31 || self.account.player.user_id === 1) {
+                        if (self.isStaff()) {
                             var room_id = parseInt(data[1]);
                             var room_title = data[2];
                             if (room_title.length > 30) {
@@ -191,20 +209,20 @@ module.exports = class Commands {
                     }
                 case '/items':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.account.send([0,"Item1: "+self.account.player.item1+" - Item2: "+self.account.player.item2+" - Item3: "+self.account.player.item3,"",6]);
                         }
                         break;
                     }
                 case '/resetallthegame':
                     {
-                        if (self.account.player.user_id === 1)
+                        if (self.isSuperAdmin())
                             process.exit(1);
                         break;
                     }
                 case '/prix_state':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             let state = parseInt(data[1]);
                             if (state === 0) {
                                 let Time_Event = Date.now() + (60 * 1000 * 120);
@@ -245,7 +263,7 @@ module.exports = class Commands {
                     }
                 case '/length_server':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.forEachAccount(function (account) {
                                 if (account !== null) {
                                     self.account.send([0,"Length Server: "+account.length,"",6]);
@@ -256,7 +274,7 @@ module.exports = class Commands {
                     }
                 case '/server':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 31 || self.account.player.user_id === 4 || self.account.player.user_id === 106) {
+                        if (self.isStaff()) {
                             self.gameserver.forEachAccount(function (account) {
                                 if (account !== null) {
                                     self.account.send([0,"UserID: "+account.user_id+" - User: "+account.player.game_id+" - Rank: (rank"+account.player.rank+") - Win: "+account.player.win+" - Loss: "+account.player.loss,"",6]);
@@ -267,7 +285,7 @@ module.exports = class Commands {
                     }
                 case '/users_rooms':
                     {
-                        if (self.account.player.user_id === 31) {
+                        if (self.isStaff()) {
                             self.gameserver.forEachAccount(function (account) {
                                 if (account !== null) {
                                     if (account.player.guild === data[1]) {
@@ -280,7 +298,7 @@ module.exports = class Commands {
                     }
                 case '/ips_users_rooms':
                     {
-                        if (self.account.player.user_id === 31) {
+                        if (self.isStaff()) {
                             self.gameserver.forEachAccount(function (account) {
                                 if (account !== null) {
                                     if (account.player.computer_ip === data[1]) {
@@ -293,7 +311,7 @@ module.exports = class Commands {
                     }
                 case '/new_update':
                     {
-                        if (self.account.player.user_id === 31) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.forEachAccount(function (account) {
                                 if (account !== null && self.account.player.user_id !== account.player.user_id) {
                                     account.send([25,4]);
@@ -305,7 +323,7 @@ module.exports = class Commands {
                 
                 case '/room':
                     {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 27 || self.account.player.user_id === 1/*self.account.player.user_id === 1*/) {
+                        if (self.isStaff()) {
                             var enter_room = parseInt(data[1]);
                             self.gameserver.getRoomById(enter_room, function (room) {
                                 room.forPlayers(function (account) {
@@ -461,7 +479,7 @@ module.exports = class Commands {
                     }
                 case '/prueba_prix':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.onAccountConnect(function (account) {
                                 account.send([Types.SERVER_OPCODE.hi, 86, 'chavez torres (berny)', 1, 3]);
                             });
@@ -499,8 +517,8 @@ module.exports = class Commands {
                         let descuento = parseInt(data[2]);
                         self.gameserver.db.getUserByGameId(self2.player.game_id).then(function (rows) {
                             var gp_user = rows[0][0];
-                            if (self.account.player.user_id === 1 || self.account.player.user_id === 2) {
-                                if (self.account.player.rank === 26 || self.account.player.user_id === 1) {
+                            if (self.isSuperAdmin()) {
+                                if (self.isStaff()) {
                                     self.account.send([0,'Tu Rango No Tiene Permitido Descontar GPs A Los De Nivel Superior.','',6]);
                                     return null;
                                 }
@@ -527,7 +545,7 @@ module.exports = class Commands {
                     }
                 case '/ad':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 3 || self.account.player.user_id === 4 || self.account.player.user_id === 106) {
+                        if (self.isSuperAdmin()) {
                             let self2 = self.gameserver.getAccountById(parseInt(data[1]));
                             self2.send([17,"Aviso Del GM "+self.account.player.game_id,""+data[2]]);
                             Logger.info("El GM "+self.account.player.game_id+" - Le envio al usuario: "+self2.player.game_id+" [UserID: "+self2.player.user_id+"] - Un Aviso: "+data[2]);
@@ -536,7 +554,7 @@ module.exports = class Commands {
                     }
                 case '/ban_ip':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 13 || self.account.player.user_id === 4 || self.account.player.user_id === 128 || self.account.player.user_id === 3) {
+                        if (self.isStaff()) {
                             var ComputerIP = data[1];
                             self.gameserver.db.putComputerIPBanned(ComputerIP, '200.68.138.152', self.account.player.game_id, self.account.player.user_id);
                             self.account.send([0,"You Prohibited The Income Through Computer IP: "+ComputerIP,"",6]);
@@ -545,7 +563,7 @@ module.exports = class Commands {
                     }
                 case '/sge':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.evento200 = !0;
                             Logger.info("evento alterado a :"+(self.gameserver.evento200 ? "true" : "false"));
                             self.gameserver.forEachAccount(function (accountp) {
@@ -561,7 +579,7 @@ module.exports = class Commands {
                     }
                 case '/ege':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 3) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.evento200 = !1;
                             Logger.info("evento alterado a :"+(self.gameserver.evento200 ? "true" : "false"));
                             self.gameserver.forEachAccount(function (accountp) {
@@ -577,7 +595,7 @@ module.exports = class Commands {
                     }
                 case '/event':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.rank === 31) {
+                        if (self.isSuperAdmin()) {
                             let EvenTime = parseInt(data[1]);
                             if (self.gameserver.evento500 === true) {
                                 self.account.send([0,'During the 500% CASH & GOLD event you can not add another type of event :(','',6]);
@@ -607,7 +625,7 @@ module.exports = class Commands {
                     }
                 case '/muted':
                     {
-                        if (self.account.player.rank === 26  || self.account.player.rank === 27 || self.account.player.rank === 31 || self.account.player.user_id === 31 || self.account.player.user_id === 20 || self.account.player.user_id === 106 || self.account.player.user_id === 128) {
+                        if (self.isStaff()) {
                             let self2 = self.gameserver.getAccountById(parseInt(data[1]));
                             let DateMuted = parseInt(data[2]);
                             let razon = data[3];
@@ -632,7 +650,7 @@ module.exports = class Commands {
                     }
                 case '/dual':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.account.player.DUAL = 1;
                             self.gameserver.pushBroadcastChat(new Message.chatResponse(self, self.account.player.game_id+ " Used Item: Dual", Types.CHAT_TYPE.SYSTEM), self.account.room);
                         }
@@ -640,7 +658,7 @@ module.exports = class Commands {
                     }
                 case '/teleport':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.account.player.TELEPORT = 1;
                             self.gameserver.pushBroadcastChat(new Message.chatResponse(self, self.account.player.game_id+ " Used Item: Teleport", Types.CHAT_TYPE.SYSTEM), self.account.room);
                         }
@@ -764,7 +782,7 @@ module.exports = class Commands {
                     }
                 case '/ban':
                     {
-                         if (self.account.player.rank === 26 || self.account.player.rank === 27 || self.account.player.rank === 31 || self.account.player.user_id === 20/*self.account.player.user_id === 1*/) {
+                         if (self.isStaff()) {
                             let init = data[0];Logger.info("init: "+init);
                             let user_id = parseInt(data[1]);Logger.info("user_id: "+user_id);
                             let razon = data[2]+" "+" ";Logger.info("razon: "+razon);
@@ -802,7 +820,7 @@ module.exports = class Commands {
                     }
                 case '/pin_code':
                     {//randomString
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 55 || self.account.player.user_id === 1 || self.account.player.user_id === 4 || self.account.player.user_id === 106 || self.account.player.user_id === 128 || self.account.player.user_id === 3) {
+                        if (self.isSuperAdmin()) {
                             var name = data[1];
                             var monto = data[2];
                             var cash = "";
@@ -831,7 +849,7 @@ module.exports = class Commands {
                     }
                 case '/gift_admins':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             var itm = [];
                             let user_id = parseInt(data[1]);
                             let self2 = self.gameserver.getAccountById(parseInt(user_id));
@@ -1107,7 +1125,7 @@ module.exports = class Commands {
                     
                 case '/admin_gift':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             //Logger.normal("Activando Función");
                             let user_id = parseInt(data[1]);
                             let self2 = self.gameserver.getAccountById(parseInt(user_id));
@@ -1175,7 +1193,7 @@ module.exports = class Commands {
                     
                 case '/All_Winners':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.pushBroadcast(new Message.chatResponse(self.account, "Tournament Ended", Types.CHAT_TYPE.SYSTEM));
                             self.gameserver.pushBroadcast(new Message.chatResponse(self.account, "Prix Finished! Calculating final rankings and sending gifts...", Types.CHAT_TYPE.SYSTEM));
                             self.gameserver.db.getUsersPrixByAllWinners(parseInt(0), parseInt(1)).then(function (rows) {
@@ -1784,7 +1802,7 @@ module.exports = class Commands {
                     }
                 case '/All_Winners2':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.pushBroadcast(new Message.chatResponse(self.account, "Tournament Ended", Types.CHAT_TYPE.SYSTEM));
                             self.gameserver.pushBroadcast(new Message.chatResponse(self.account, "Prix Finished! Calculating final rankings and sending gifts...", Types.CHAT_TYPE.SYSTEM));
                             self.gameserver.db.getGiftsTournamentByPositions(parseInt(1)).then(function (rowss) {
@@ -1831,7 +1849,7 @@ module.exports = class Commands {
                     }
                 case '/prix':
                     {
-                        if (self.account.player.user_id === 31) {
+                        if (self.isSuperAdmin()) {
                             let init = data[0];
                             Logger.info("init: "+init);
                             /*================================================================================================================*/
@@ -2115,7 +2133,7 @@ module.exports = class Commands {
                     }
                 case '/recarga':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             var user_id = data[1];
                             var cash = parseInt(data[2]);
                             var mensaje = "Gracias Por Confiar En Nosotros. / Thanks For Trusting Us.";
@@ -2239,7 +2257,7 @@ module.exports = class Commands {
                     }
                 case '/cash_broma':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 3) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.forEachAccount(function (account) {
                                 if (account !== null) {
                                     account.send([17, "Received Cash! :)", "You just received <font color='yellow'>67000</font> Cash from<br><font color='yellow'>"+self.account.player.game_id+"</font>.<br><br>And received gift <font color='cyan'>(RARE) Cash Charger</font>.<br><br>Thank You!"]);
@@ -2380,7 +2398,7 @@ module.exports = class Commands {
                     }*/
                 case '/botar':
                      {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 27 || self.account.player.rank === 31 || self.account.player.user_id === 13) {
+                        if (self.isStaff()) {
                             let init = data[0];
                             let user_name = junteall(msj);
                             self.gameserver.db.getUserByGameId(user_name).then(function(acc) {
@@ -2443,7 +2461,7 @@ module.exports = class Commands {
                     }
                 case '/users_ip':
                     {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 27 || self.account.player.user_id === 31) {
+                        if (self.isStaff()) {
                             self.gameserver.db.getIpBannedById(junteall(msj)).then(function (rows) {
                                 var users_ip = rows[0];
                                 for (var xm in users_ip) {//game_id, rank, IdAcc, IP
@@ -2508,7 +2526,7 @@ module.exports = class Commands {
                     }
                 case '/love':
                     {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 31 || self.account.player.user_id === 13 || self.account.player.user_id === 20) {
+                        if (self.isGM()) {
                             if (data[1] !== null && data[1].length > 0) {
                                 var mensaje = JSON.stringify([0, junteall(msj), self.account.player.game_id, 12, self.account.player.guild]);
                                 this.gameserver.server._wss.clients.forEach(function each(client) {
@@ -2532,7 +2550,7 @@ module.exports = class Commands {
                     }
                 case '/chat_gift':
                     {
-                        if (self.account.player.user_id === 31) {
+                        if (self.isSuperAdmin()) {
                             if (data[1] !== null && data[1].length > 0)
                                 self.gameserver.pushBroadcast(new Message.chatResponse(self.account, junteall(msj), Types.CHAT_TYPE.GIFT));
                         }
@@ -2541,7 +2559,7 @@ module.exports = class Commands {
                     
                     case '/chat_love':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 3 || self.account.player.user_id === 4 || self.account.player.user_id === 106) {
+                        if (self.isSuperAdmin()) {
                             if (data[1] !== null && data[1].length > 0)
                                 self.gameserver.pushBroadcast(new Message.chatResponse(self.account, junteall(msj), Types.CHAT_TYPE.LOVE));
                         }
@@ -2629,7 +2647,7 @@ module.exports = class Commands {
                     }
                 case '/on4':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 3 || self.account.player.user_id === 13 || self.account.player.user_id === 4 || self.account.player.user_id === 106 || self.account.player.user_id === 128 && typeof (self.account.room) !== 'undefined') {
+                        if (self.isGM() && typeof (self.account.room) !== 'undefined') {
                             self.account.room.max_players = 8;
                             self.account.room.RoomUpdate(self);
                             self.account.room.status = Types.ROOM_STATUS.WAITING;
@@ -2639,7 +2657,7 @@ module.exports = class Commands {
                     }
                 case '/on3':
                     {
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2 || self.account.player.user_id === 13 || self.account.player.user_id === 4 || self.account.player.user_id === 3 || self.account.player.user_id === 128 && typeof (self.account.room) !== 'undefined') {
+                        if (self.isGM() && typeof (self.account.room) !== 'undefined') {
                             self.account.room.max_players = 6;
                             self.account.room.RoomUpdate(self);
                             self.account.room.status = Types.ROOM_STATUS.WAITING;
@@ -2649,7 +2667,7 @@ module.exports = class Commands {
                     }
                 case '/on2':
                     {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 31 || self.account.player.rank === 31 || self.account.player.user_id === 4 || self.account.player.user_id === 106 || self.account.player.user_id === 128 && typeof (self.account.room) !== 'undefined') {
+                        if (self.isGM() && typeof (self.account.room) !== 'undefined') {
                             self.account.room.max_players = 4;
                             self.account.room.RoomUpdate(self);
                             self.account.room.status = Types.ROOM_STATUS.WAITING;
@@ -2659,7 +2677,7 @@ module.exports = class Commands {
                     }
                 case '/on1':
                     {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 31 || self.account.player.user_id === 1 || self.account.player.user_id === 4 || self.account.player.user_id === 3 || self.account.player.user_id === 128 && typeof (self.account.room) !== 'undefined') {
+                        if (self.isGM() && typeof (self.account.room) !== 'undefined') {
                             self.account.room.max_players = 2;
                             self.account.room.RoomUpdate(self);
                             self.account.room.status = Types.ROOM_STATUS.WAITING;
@@ -2669,7 +2687,7 @@ module.exports = class Commands {
                     }
                 case '/on':
                     {
-                        if (self.account.player.rank === 26 || self.account.player.rank === 31 || self.account.player.user_id === 1 || self.account.player.user_id === 20 || self.account.player.user_id === 106 || self.account.player.user_id === 128 && typeof (self.account.room) !== 'undefined') {
+                        if (self.isGM() && typeof (self.account.room) !== 'undefined') {
                             self.account.room.max_players = 0;
                             self.account.room.RoomUpdate(self);
                             self.gameserver.pushBroadcastChat(new Message.chatResponse(self, "Room: 0 Vs 0", Types.CHAT_TYPE.SYSTEM), self.account.room);
@@ -2687,14 +2705,14 @@ module.exports = class Commands {
                     }
 				case '/end_game':
                     {
-                        if (self.account.player.user_id === 1)
+                        if (self.isSuperAdmin())
                             self.account.room.game.checkDead();
                         break;
                     }
                     
                 case '/start':
                     {
-                        if (self.account.player.user_id === 1 && typeof (self.account.room) !== 'undefined') {
+                        if (self.isSuperAdmin() && typeof (self.account.room) !== 'undefined') {
                             if (typeof (self.account.room.game) !== 'undefined') {
                                 self.account.room.gameStart(self);
                             }
@@ -2752,14 +2770,14 @@ module.exports = class Commands {
                         if (self.account.player.gm === 0) {
                             self.account.send([0," User Commands:<br>/kick [Name], /kick_a, /kick_b, /kick_all<br>/master [Name]<br>/guild_pf Link_Url = Guild Img Profile<br>/guild_bg Link_Url = Guild Img Background<br>/password [pw]<br>/add [Name]<br>/block_friend_requests","",6]);
                         }
-                        if (self.account.player.user_id === 1 || self.account.player.user_id === 2) {
+                        if (self.isSuperAdmin()) {
                             self.account.send([0," GM Commands:<br>/bcm Text<br>/bot Text<br>/botar Name<br>/on = [Room: 0 Vs 0]<br>/on1 = [Room: 1 Vs 1]<br>/on2 = [Room: 2 Vs 2]<br>/on3 = [Room: 3 Vs 3]<br>/on4 = [Room: 4 Vs 4]<br>/power = [Power Room: On]<br>/info - /info2 Name = [Info User]<br>/payer Name = [Id User]<br>/gift UserID<br>/cash UserID Monto "+'"Text"'+"<br>/ban UserID "+'"Motivo"'+" "+'"Time = [-e ó -d]"'+"<br>-e = permanentemente [ imgur.com/wKZoZgi.png ]<br>-d = por dias [ imgur.com/GTPPpt7.png ]<br>/recarga UserID MontoCash<br>/pin_code Propetario Monto<br>/server<br>/gift_a, /gift_b, /gift_all<br>/room RoomId<br>/gp UserID GPDeDescuento<br>/muted UserID Minutes "+'"Text"'+"<br>/room_title RoomID "+'"Titulo"'+"<br>/map_room MapID<br>/users_ip IP<br>/mobil IdMobil<br>/ad UserID "+'"Text"'+"<br>/password_cuenta Name<br>/country Name [NombreDelPaís]<br>/gold UserId Monto<br>/kickgm Name<br>/desbanear Name","",6]);
                         }
                         break;
                     }
                 case '/reset':
                     {
-                        if (self.account.player.user_id === 1) {
+                        if (self.isSuperAdmin()) {
                             self.gameserver.pushBroadcast(new Message.chatResponse(self, "New Update In 10 Minutes.", Types.CHAT_TYPE.SYSTEM));
                              var reset2 = setTimeout(function () {
                                  self.gameserver.pushBroadcast(new Message.chatResponse(self, "New Update In 9 Minutes.", Types.CHAT_TYPE.SYSTEM));

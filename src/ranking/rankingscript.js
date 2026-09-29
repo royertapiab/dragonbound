@@ -66,7 +66,7 @@ async function updateRankings() {
         logPoolStatus(pool);
 
         // Get all users sorted by GP in descending order
-        const [allRows] = await connection.execute('SELECT Id, gp, gm FROM users ORDER BY gp DESC');
+        const [allRows] = await connection.execute('SELECT Id, gp, gm, rank FROM users ORDER BY gp DESC');
         const totalPlayers = allRows.length;
 
         // Users with GP greater than 8746
@@ -137,8 +137,8 @@ async function updateRankings() {
             await connection.execute(`UPDATE users SET rank = CASE Id ${ids.map((id, index) => `WHEN ${id} THEN ${ranks[index]}`).join(' ')} END WHERE Id IN (${ids.join(',')})`);
         }
 
-        // Update ranks for GMs
-        const gmIds = allRows.filter(row => row.gm === 1).map(row => row.Id);
+        // Update ranks for GMs (preserve rank 31 for Super Admins / Owners)
+        const gmIds = allRows.filter(row => row.gm === 1 && row.rank !== 31).map(row => row.Id);
         if (gmIds.length > 0) {
             await connection.execute(`UPDATE users SET rank = 26 WHERE Id IN (${gmIds.join(',')})`);
         }

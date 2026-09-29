@@ -24,16 +24,17 @@ module.exports = class WS extends Server {
             res.send("hi");
         });
         this._httpServer.on('request', this._app);
-        this._httpServer.listen(port, function() {
+        this._httpServer.listen(port, '127.0.0.1', function() {
             var st = process.env.vps == '1' ? 'VPS' : 'LOCAL';
             st = process.env.vps == '3' ? 'LINUX' : st;
-            Logger.normal('Listening on ' + st + " " + http.address().port);
+            Logger.normal('Listening on ' + st + " 127.0.0.1:" + http.address().port);
         });
         this._wss = new WebSocketServer({
             server: http
         });
         this._wss.on('connection', function connection(ws,req) {
-            self.server_qid=parseInt(req.url.split("/")[1]);
+            var urlParts = req.url.split("/").filter(Boolean);
+            self.server_qid = parseInt(urlParts[urlParts.length - 1]) || 1;
             var c = new SocketConnection(self._createId(), ws, self);
             if (self.connection_callback) {
                 self.connection_callback(c);

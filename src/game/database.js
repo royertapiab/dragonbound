@@ -1,3 +1,4 @@
+require("dotenv").config();
 let mysql = require("mysql2/promise");
 var Logger = require("./lib/logger");
 var Promise = require("promise");
@@ -6,15 +7,17 @@ module.exports = class DataBase {
   constructor(wait = false) {
     var self = this;
     this.connection = null;
-    this.host = "localhost";
-    this.user = "root";
-    this.password = "rootpassword";
-    this.database = "dragonbound";
+    this.host = process.env.DB_HOST || "localhost";
+    this.port = parseInt(process.env.DB_PORT) || 3306;
+    this.user = process.env.DB_USER || "root";
+    this.password = process.env.DB_PASSWORD || "rootpassword";
+    this.database = process.env.DB_DATABASE || "dragonbound";
 
     if (!wait) {
       this.connection = mysql.createPool({
         connectionLimit: 500,
         host: self.host,
+        port: self.port,
         user: self.user,
         password: self.password,
         database: self.database,
@@ -32,6 +35,7 @@ module.exports = class DataBase {
       database.connection = mysql.createPool({
         connectionLimit: 500,
         host: database.host,
+        port: database.port,
         user: database.user,
         password: database.password,
         database: database.database,
@@ -148,7 +152,7 @@ module.exports = class DataBase {
       self.connection.getConnection().then((conn) => {
         conn
           .query(
-            "SELECT u.Id, u.gm, u.IdAcc, u.country, u.banned, u.game_id,u.lucky_egg, u.rank, u.gp, u.gold, u.cash, u.name_changes, u.gender, u.photo_url, u.power_user, u.plus10gp, u.map_pack, u.megaphones, u.is_muted, u.win, u.loss, u.prixw, u.probability, u.IP, u.block_friend, u.CashCharger, u.lucky_egg_sec_left, u.electrico, ae.head, ae.body, ae.eyes, ae.flag, ae.background, ae.foreground, ac.PinUser, ac.Session, ac.no_win_bonus, ev.Server_Id, ev.historychat, ev.date, ev.time, ev.tipo, ev.server_tournament_state, ev.holiday, ev.server_check, ev.first_important_ranks, it.tournament_server, it.tournament_start_time, it.tournament_end_time, it.tournament_gifts_users, it.tournament_state_server, it.tournament_check FROM users u INNER JOIN user_avatar_equiped ae ON u.Id = ae.Id INNER JOIN accounts ac ON ac.Id = u.IdAcc INNER JOIN event_game ev ON ev.Server_Id = 1 INNER JOIN info_tournament it ON it.tournament_server = 5 WHERE u.IdAcc = ?",
+            "SELECT u.Id, u.gm, u.IdAcc, u.country, u.banned, u.game_id,u.lucky_egg, u.rank, u.gp, u.gold, u.cash, u.name_changes, u.gender, u.photo_url, u.power_user, u.plus10gp, u.map_pack, u.megaphones, u.is_muted, u.win, u.loss, u.prixw, u.probability, u.IP, u.block_friend, u.CashCharger, u.lucky_egg_sec_left, u.electrico, COALESCE(ae.head, 1) as head, COALESCE(ae.body, 2) as body, COALESCE(ae.eyes, 0) as eyes, COALESCE(ae.flag, 0) as flag, COALESCE(ae.background, 0) as background, COALESCE(ae.foreground, 0) as foreground, ac.PinUser, ac.Session, ac.no_win_bonus, ev.Server_Id, ev.historychat, ev.date, ev.time, ev.tipo, ev.server_tournament_state, ev.holiday, ev.server_check, ev.first_important_ranks, it.tournament_server, it.tournament_start_time, it.tournament_end_time, it.tournament_gifts_users, it.tournament_state_server, it.tournament_check FROM users u LEFT JOIN user_avatar_equiped ae ON u.Id = ae.Id INNER JOIN accounts ac ON ac.Id = u.IdAcc INNER JOIN event_game ev ON ev.Server_Id = 1 INNER JOIN info_tournament it ON it.tournament_server = 5 WHERE u.IdAcc = ?",
             [id]
           )
           .then((rows) => {
@@ -372,7 +376,7 @@ module.exports = class DataBase {
           .then((rows) => {
             conn.release();
             if (rows[0].length > 0) return resolve(rows);
-            else return reject();
+            else return resolve([[{ user_id: id, relationship_status: 's', relationship_with_id: 0, rank: 0, photo_url: '', game_id: '', gender: 'm' }]]);
           });
       });
     });
