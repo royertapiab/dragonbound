@@ -36,7 +36,7 @@ router.get('/', auth, csrfProtection, function (req, res) {
             if (rows4[0].length > 0) {
                 var rows_x2 = rows4[0];
                 var user_state = false;
-                if (rows_x2[0].IdAcc === 1 || rows_x2[0].IdAcc === 6 || (rows_x2[0].gm === 1 && rows_x2[0].rank === 31)) {
+                if (rows_x2[0].IdAcc === 1 || rows_x2[0].IdAcc === 2 || (rows_x2[0].gm === 1 && rows_x2[0].rank === 31)) {
                     
                     var rows_table_results = [];
                     var ava_script = [];

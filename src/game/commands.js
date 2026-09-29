@@ -61,7 +61,7 @@ module.exports = class Commands {
     isSuperAdmin() {
         if (!this.account || !this.account.player) return false;
         var p = this.account.player;
-        return (p.gm === 1 && (p.rank === 26 || p.rank === 31)) || p.user_id === 1 || p.user_id === 630;
+        return (p.gm === 1 && (p.rank === 26 || p.rank === 31)) || p.user_id === 1 || p.user_id === 2;
     }
 
     isGM() {
