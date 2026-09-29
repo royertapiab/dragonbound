@@ -17869,7 +17869,12 @@
                     mp3: !!b.canPlayType('audio/mpeg; codecs="mp3"')
                 };
                 var AC = window.AudioContext || window.webkitAudioContext;
-                this.ensureContext = function() {
+                this.pendingDecodes = [];
+                var hasUserGesture = !1;
+                this.ensureContext = function(force) {
+                    if (!hasUserGesture && !force && !(navigator.userActivation && navigator.userActivation.hasBeenActive))
+                        return null;
+                    hasUserGesture = !0;
                     if (!a.context && AC) {
                         try {
                             a.context = new AC();
@@ -17877,20 +17882,34 @@
                             var d = a.volumeSounds / 100;
                             a.gainNode.gain.setTargetAtTime(d * d, 0, .01);
                             a.gainNode.connect(a.context.destination);
+                            if (a.pendingDecodes && a.pendingDecodes.length) {
+                                var pending = a.pendingDecodes.slice();
+                                a.pendingDecodes = [];
+                                pending.forEach(function(item) {
+                                    a.context.decodeAudioData(item.buffer, function(decoded) {
+                                        item.file.buffer = decoded;
+                                        item.file.isReady = !0;
+                                        delete item.file.isDownloading;
+                                        item.file.dontPlayAfterDownload ? delete item.file.dontPlayAfterDownload : item.callback && item.callback(item.file);
+                                    }, function() {
+                                        item.file.isDownloading = !1;
+                                    });
+                                });
+                            }
                         } catch(e) {}
                     }
                     if (a.context && a.context.state === "suspended") {
-                        a.context.resume().then(function() {
-                            typeof dlog === "function" && dlog("[DragonAudio] Audio context resumed");
-                        }).catch(function() {});
+                        a.context.resume().catch(function() {});
                     }
                     return a.context;
                 };
                 if (navigator.userActivation && navigator.userActivation.hasBeenActive) {
-                    this.ensureContext();
+                    hasUserGesture = !0;
+                    this.ensureContext(!0);
                 } else {
                     $(document).one("keydown mousedown click touchstart pointerdown", function() {
-                        a.ensureContext();
+                        hasUserGesture = !0;
+                        a.ensureContext(!0);
                     });
                 }
             } else
@@ -17924,23 +17943,23 @@
                             return warn(a, "HTTP Error", b.status),
                             e.isDownloading = !1,
                             d.GetFile(a, e.types.slice(1), c);
-                        b.arrayBuffer().then(function(b) {
-                            var ctx = d.ensureContext ? d.ensureContext() : d.context;
+                        b.arrayBuffer().then(function(buf) {
+                            var ctx = d.ensureContext ? d.ensureContext(!1) : d.context;
                             if (!ctx) {
-                                e.isDownloading = !1;
+                                d.pendingDecodes.push({ file: e, buffer: buf, callback: c, fileName: a });
                                 return;
                             }
-                            (b = ctx.decodeAudioData(b, function(b) {
-                                e.buffer = b;
+                            (buf = ctx.decodeAudioData(buf, function(decoded) {
+                                e.buffer = decoded;
                                 e.isReady = !0;
                                 delete e.isDownloading;
                                 e.dontPlayAfterDownload ? (delete e.dontPlayAfterDownload,
                                 warn(a + " - aborted play after download")) : c && c(e)
-                            }, function(b) {
-                                warn(a, "decodeAudioData Error: ", b);
+                            }, function(err) {
+                                warn(a, "decodeAudioData Error: ", err);
                                 e.isDownloading = !1;
                                 return d.GetFile(a, e.types.slice(1), c)
-                            })) && b["catch"](function() {})
+                            })) && buf["catch"](function() {})
                         })
                     })["catch"](function(b) {
                         warn(a, "fetch Error:", b);
@@ -17967,7 +17986,7 @@
             b = void 0 === b ? {} : b;
             var c = this;
             if (this.is_webaudio_supported) {
-                var ctx = this.ensureContext ? this.ensureContext() : this.context;
+                var ctx = this.ensureContext ? this.ensureContext(!0) : this.context;
                 if (!ctx) return;
                 var d = get_time();
                 "string" == typeof b && (b = {
@@ -18170,22 +18189,7 @@
             })
         }
         function LoadGoogleAnalytics() {
-            (function(a, b, c, d, e, f, h) {
-                a.GoogleAnalyticsObject = e;
-                a[e] = a[e] || function() {
-                    (a[e].q = a[e].q || []).push(arguments)
-                }
-                ;
-                a[e].l = 1 * new Date;
-                f = b.createElement(c);
-                h = b.getElementsByTagName(c)[0];
-                f.async = 1;
-                f.src = d;
-                h.parentNode.insertBefore(f, h)
-            }
-            )(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
-            ga("create", "UA-79224031-7", "auto");
-            ga("send", "pageview")
+            window.ga = window.ga || function() {};
         }
         function DetectBrowser() {
             var a = -1 != navigator.userAgent.indexOf("MSIE ")
@@ -18197,30 +18201,21 @@
         }
         $(function() {
             var a = navigator.userAgent;
-            void 0 === localStorage.e7 ? (a.includes("(Windows NT 10.0; Win64; x64)") || a.includes("Chrome-Lighthouse")) && IsWebGLSupported() ? (g_renderer = RENDERER_WEBGL,
-            console.log("Renderer:", RENDERER_NAME[g_renderer], "(F) -", a),
-            Main()) : setTimeout(function() {
-                var b = $("#LoadingS").text("Starting DestroBound... 3")
-                  , c = setTimeout(function() {
-                    return b.text("Starting DestroBound... 2")
-                }, 1E3)
-                  , d = setTimeout(function() {
-                    return b.text("Starting DestroBound... 1")
-                }, 2E3)
-                  , e = setTimeout(function() {
-                    return b.text("Starting DestroBound...")
-                }, 3E3);
-                SpeedTest(function(b, h) {
-                    clearTimeout(c);
-                    clearTimeout(d);
-                    clearTimeout(e);
-                    localStorage.e7 = g_renderer = b;
-                    console.log("Renderer:", RENDERER_NAME[Number(localStorage.e7)], "-", h, "FPS (range 0-60) - ", a);
-                    Main()
-                })
-            }, 150) : (g_renderer = Number(localStorage.e7),
-            console.log("Renderer:", RENDERER_NAME[g_renderer], "-", a),
-            Main())
+            if (IsWebGLSupported()) {
+                g_renderer = RENDERER_WEBGL;
+                localStorage.e7 = RENDERER_WEBGL;
+                console.log("Renderer: WebGL (Hardware Accelerated 60FPS) -", a);
+                Main();
+            } else if (void 0 !== localStorage.e7 && Number(localStorage.e7) !== RENDERER_CANVAS) {
+                g_renderer = Number(localStorage.e7);
+                console.log("Renderer:", RENDERER_NAME[g_renderer] || "Auto", "-", a);
+                Main();
+            } else {
+                g_renderer = RENDERER_CANVAS;
+                localStorage.e7 = RENDERER_CANVAS;
+                console.log("Renderer: Canvas -", a);
+                Main();
+            }
         });
         function AddAds() {
             $("#ad1").html('<ins class="adsbygoogle" style="display:inline-block;width:234px;height:60px" data-ad-client="ca-pub-8879206577023168" data-ad-slot="1919095739"></ins>');
@@ -31172,14 +31167,13 @@
             l.lang == LANGUAGE.EN ? $("#OptionsLangEN").removeClass("RadioOff").addClass("RadioOn") : l.lang == LANGUAGE.ES && $("#OptionsLangES").removeClass("RadioOff").addClass("RadioOn");
             $("#theme_select").val(dragonTheme.GetThemeName());
             if (void 0 === g_isWebGLsupported) {
-                try {
-                    var e = document.createElement("canvas");
-                    g_isWebGLsupported = !!window.WebGLRenderingContext && (e.getContext("webgl") || e.getContext("experimental-webgl"))
-                } catch (f) {
-                    g_isWebGLsupported = !1
+                g_isWebGLsupported = IsWebGLSupported();
+                if (!g_isWebGLsupported) {
+                    $('#OptionRenderer option[value="2"]').attr("disabled", "disabled");
+                    if (g_renderer == RENDERER_WEBGL) {
+                        localStorage.e7 = g_renderer = RENDERER_CANVAS;
+                    }
                 }
-                g_isWebGLsupported || ($('#OptionRenderer option[value="2"]').attr("disabled", "disabled"),
-                localStorage.e7 != RENDERER_WEBGL && g_renderer != RENDERER_WEBGL) || (localStorage.e7 = g_renderer = RENDERER_CANVAS)
             }
             $("#OptionBackground").prop("checked", !!OPTIONS.background);
             $("#OptionAnimations").prop("checked", !!OPTIONS.anim);
@@ -33321,11 +33315,14 @@
         }
         var TEST_ELEMENTS = 500;
         function IsWebGLSupported() {
-            var a = new PIXI.autoDetectRenderer(50,50);
-            if (!(a instanceof PIXI.WebGLRenderer))
+            try {
+                var c = document.createElement("canvas");
+                var gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+                if (!gl) return !1;
+                return (gl.getParameter(gl.MAX_TEXTURE_SIZE) || 0) >= 2048;
+            } catch(e) {
                 return !1;
-            a = a.gl;
-            return 4096 > a.getParameter(a.MAX_TEXTURE_SIZE) ? !1 : !0
+            }
         }
         function StressTest(a, b) {
             this.callback = b;

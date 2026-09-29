@@ -867,7 +867,7 @@ router.get('/w2', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     req.session.touch();
 
-    var counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    var counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 };
 
     function respond() {
         var data = [
@@ -877,7 +877,14 @@ router.get('/w2', function (req, res) {
             [["Battle", "Avatar On", true, "battle"], 0, "", counts[3], 500, 0, 27, ""],
             [["Holiday", "Special Server", true, "gm"], 1, "", counts[4], 500, 0, 27, ""],
             [["Prix", "Torneo Prix", false, "prix"], 2, "", counts[5], 500, 0, 27, ""],
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            [["Beginners", "Zona Novatos", false, "normal"], 0, "", counts[6], 500, 0, 27, ""],
+            [["Avatar On", "Zona Avatar", true, "battle"], 0, "", counts[7], 500, 0, 27, ""],
+            [["Guilds", "Zona Clanes", true, "normal"], 0, "", counts[8], 500, 0, 27, ""],
+            [["Aduka", "Solo Aduka", false, "bunge"], 0, "", counts[9], 500, 0, 27, ""],
+            [["Fast Lobby", "Rapido y Furioso", false, "normal"], 1, "", counts[10], 500, 0, 27, ""],
+            [["VIP", "Zona VIP", true, "vip"], 0, "", counts[11], 500, 0, 27, ""],
+            [["Prix Pro", "Torneo Prix Pro", false, "prix"], 2, "", counts[12], 500, 0, 27, ""],
+            0, 0, 0,
             1623339720117,
             parseInt(Date.now())
         ];
@@ -886,7 +893,7 @@ router.get('/w2', function (req, res) {
 
     if (req.db && req.db.connection) {
         req.db.connection.getConnection().then(function (conn) {
-            conn.query("SELECT Id, minUser FROM servidores WHERE Id <= 5").then(function (result) {
+            conn.query("SELECT Id, minUser FROM servidores WHERE Id <= 12").then(function (result) {
                 conn.release();
                 var rows = result[0];
                 if (rows && rows.length) {
