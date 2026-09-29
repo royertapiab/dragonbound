@@ -15349,17 +15349,17 @@
         BOOMER: 15,
         ELECTRICO: 16,
         GRUB: 17,
-        DRAGON2: 22,
+        DRAGON2: 18,
         RAON: 19,
-        RANDOMIZER: 23,
-        FROG: 26,
-        KALSIDDON: 20,
-        MAYA: 21,
+        RANDOMIZER: 20,
+        FROG: 21,
+        KALSIDDON: 22,
+        MAYA: 23,
         TIBURON: 24,
         PHOENIX: 25,
-        BEE: 27
+        BEE: 26
         }
-          , SELECTABLE_MOBILES = [MOBILE.ARMOR, MOBILE.ICE, MOBILE.ADUKA, MOBILE.LIGHTNING, MOBILE.BIGFOOT, MOBILE.JD, MOBILE.ASATE, MOBILE.NAK, MOBILE.TRICO, MOBILE.MAGE, MOBILE.TURTLE, MOBILE.BOOMER, MOBILE.RANDOM];
+          , SELECTABLE_MOBILES = [MOBILE.ARMOR, MOBILE.ICE, MOBILE.ADUKA, MOBILE.LIGHTNING, MOBILE.BIGFOOT, MOBILE.JD, MOBILE.ASATE, MOBILE.NAK, MOBILE.TRICO, MOBILE.MAGE, MOBILE.TURTLE, MOBILE.BOOMER, MOBILE.GRUB, MOBILE.RAON, MOBILE.RANDOMIZER, MOBILE.FROG, MOBILE.KALSIDDON, MOBILE.RANDOM];
       
     function GetMobileAfter(a) {
         return SELECTABLE_MOBILES[(SELECTABLE_MOBILES.indexOf(a) + 1) % SELECTABLE_MOBILES.length]
@@ -17898,7 +17898,7 @@
                             }
                         } catch(e) {}
                     }
-                    if (a.context && a.context.state === "suspended") {
+                    if (hasUserGesture && a.context && a.context.state === "suspended") {
                         a.context.resume().catch(function() {});
                     }
                     return a.context;
@@ -27988,8 +27988,8 @@
                     }(f), function() {})
                 }
                 $(".Alt").is(":visible") && $(".Alt").show();
-                15 == e.length && d.css({
-                    height: 370
+                d.css({
+                    height: 490
                 });
                 d.slideDown("fast")
             });
@@ -30922,7 +30922,7 @@
                             }
                     else if (a.location == GUI_LOCATION_ROOM)
                         if ($("#roomMobileSelect").is(":visible")) {
-                            var e = [KEY.N0, KEY.N1, KEY.N2, KEY.N3, KEY.N4, KEY.N5, KEY.N6, KEY.N7, KEY.N8, KEY.N9, KEY.A, KEY.B, KEY.C, KEY.D, KEY.E, KEY.F].indexOf(c.which);
+                            var e = [KEY.N0, KEY.N1, KEY.N2, KEY.N3, KEY.N4, KEY.N5, KEY.N6, KEY.N7, KEY.N8, KEY.N9, KEY.A, KEY.B, KEY.C, KEY.D, KEY.E, KEY.F, KEY.G, KEY.H].indexOf(c.which);
                             if (0 <= e)
                                 $(".mobileSelectBtn").eq(e).click();
                             else
@@ -35520,10 +35520,11 @@
         }
         ;
         WindMeter.prototype.SetPower = function(a) {
+            if (isNaN(a)) a = 0;
             if (this.shownPower != a) {
                 this.shownPower = a;
-                this.removeChild(this.digit1);
-                this.removeChild(this.digit2);
+                if (this.digit1 && this.digit1.parent === this) this.removeChild(this.digit1);
+                if (this.digit2 && this.digit2.parent === this) this.removeChild(this.digit2);
                 var b = GAME_STUFF, c, d = 0, e = 16777215;
                 10 > a ? c = b.digGreenY : 20 > a ? (c = b.digGreenY,
                 e = 16776960,

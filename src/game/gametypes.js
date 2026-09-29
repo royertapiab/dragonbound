@@ -1,6 +1,6 @@
 var _ = require("underscore");
 
-Types = {
+var Types = {
     SERVER_OPCODE: {
         chat: 0,
         my_player_info: 1,
@@ -706,12 +706,12 @@ Types = {
 		TAG: 4,
 
     },
-    RANDOMIZER: [0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 15],
+    RANDOMIZER: [0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 15, 17, 19, 21, 22],
     GAME_ID: ["GM", "DN"],
     MAPS_PLAY: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49],
 //    MAPS_PLAY_BOSS: [0, 1, 2, 3, 4, 5], //, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49],
     MAPS_PLAY_BOSS: [1, 6, 8, 9],
-    MOBILE_R: [0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 15],
+    MOBILE_R: [0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 15, 17, 19, 21, 22],
     COMPUTER_PLAYER : [
         { rank: 0, game_id: "Clown Stripe", gp: 1, atk: 5, def: 0, life: 10, dig: 0, gender: "m", ahead: 17, abody: 31, aflag: 0, aeyes: 0, mobile: 0,guild: ''}, 
         { rank: 1, game_id: "Haris Pilton", gp: 2, atk: 7, def: 4, life: 15, dig: 0, gender: "f", ahead: 42, abody: 45, aflag: 0, aeyes: 0, mobile: 15,guild: ''}, 
@@ -2802,11 +2802,93 @@ Types.MOBILES = [
 			[54, 42]
 		]
 	}, {
+		delay: 500,
 		name: "Grub",
 		file: "grub",
 		player_x: 5,
 		player_y: -33,
 		hp: 1000,
+		shoots: [
+			[
+				{
+					delay		: 250,
+					addtime		: 0,
+					damage		: 160,
+					pala_bunge	: [35,27],
+					image		: Types.BULLETS.GRUB1,
+					explode		: Types.EXPLODE.GRUB1,
+					weight		: 398,
+					friccion	: 0
+				}
+			],
+			[
+				{
+					delay		: 400,
+					addtime		: 0,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.GRUB2,
+					explode		: Types.EXPLODE.GRUB2,
+					weight		: 398,
+					friccion	: 0
+				},
+				{
+					addtime		: 100,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.GRUB2,
+					explode		: Types.EXPLODE.GRUB2,
+					weight		: 398,
+					friccion	: 0,
+					modifiers	: {
+						y0		: -5,
+						ang		: 2,
+						power	: 10
+					}
+				},
+				{
+					addtime		: 200,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.GRUB2,
+					explode		: Types.EXPLODE.GRUB2,
+					weight		: 398,
+					friccion	: 0,
+					modifiers	: {
+						y0		: -5,
+						ang		: -2,
+						power	: -10
+					}
+				},
+				{
+					addtime		: 300,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.GRUB2,
+					explode		: Types.EXPLODE.GRUB2,
+					weight		: 398,
+					friccion	: 0,
+					modifiers	: {
+						y0		: -10,
+						ang		: 4,
+						power	: 15
+					}
+				}
+			],
+			[
+				{
+					delay		: 800,
+					addtime		: 0,
+					damage		: 450,
+					pala_bunge	: [50,40],
+					image		: Types.BULLETS.GRUBSS,
+					explode		: Types.EXPLODE.GRUBSS,
+					weight		: 398,
+					friccion	: 0,
+					ss			: true
+				}
+			]
+		],
 		explodes: [Types.EXPLODE.GRUB1, Types.EXPLODE.GRUB2, Types.EXPLODE.GRUBSS],
 		bullets: [Types.BULLETS.GRUB1, Types.BULLETS.GRUB2, Types.BULLETS.GRUBSS],
 		graphics: [
@@ -3070,8 +3152,8 @@ Types.MOBILES = [
 				{
 					delay		: 250,
 					addtime		: 0,
-					damage		: 150,
-					pala_bunge	: [58,58],
+					damage		: 160,
+					pala_bunge	: [35,27],
 					image		: Types.BULLETS.RAON1,
 					explode		: Types.EXPLODE.RAON1,
 					weight		: 398,
@@ -3082,64 +3164,35 @@ Types.MOBILES = [
 				{
 					delay		: 400,
 					addtime		: 0,
-					damage		: 240,
-					pala_bunge	: [0],
+					damage		: 135,
+					pala_bunge	: [35,27],
 					image		: Types.BULLETS.RAON2,
-					explode		: null,
+					explode		: Types.EXPLODE.RAON2,
 					weight		: 398,
 					friccion	: 0,
-					addAtEnd: ["walk"],
-					walk: {
-						damage: 240,
-						walk: true,
-						walk_max: 30,
-						is_alive: true,
-						image: Types.BULLETS.RAONMINE,
-						explode: Types.EXPLODE.RAONMINE,
-					}
 				},
 				{
 					delay		: 0,
 					addtime		: 100,
-					damage		: 240,
-					pala_bunge	: [0],
+					damage		: 135,
+					pala_bunge	: [35,27],
 					image		: Types.BULLETS.RAON2,
-					explode		: null,
+					explode		: Types.EXPLODE.RAON2,
 					weight		: 398,
 					friccion	: 0,
-					addAtEnd: ["walk"],
-					walk: {
-						damage: 240,
-						walk: true,
-						walk_max: 30,
-						is_alive: true,
-						image: Types.BULLETS.RAONMINE,
-						explode: Types.EXPLODE.RAONMINE,
-					}
 				}
 			],
 			[
 				{
 					delay		: 800,
 					addtime		: 0,
-					damage		: 400,
-					pala_bunge	: [0,0],
+					damage		: 480,
+					pala_bunge	: [50,40],
 					image		: Types.BULLETS.RAONSS,
-					explode		: null,
+					explode		: Types.EXPLODE.RAONSS,
 					weight		: 398,
 					friccion	: 0,
-					ss			: true,
-					addAtEnd	: ["walk"],
-					walk: [
-						{
-							damage		: 75,
-							pala_bunge	: [38,38],
-							addtime		: 200,
-							dir			: "auto",
-							image		: Types.BULLETS.RAONSS_WALKER,
-							explode		: Types.EXPLODE.RAONSS_WALKER
-						}
-					]
+					ss			: true
 				}
 			]
 		],
@@ -3159,10 +3212,60 @@ Types.MOBILES = [
 			[54, 33]
 		]
 	}, {
+		delay: 500,
 		name: "Randomizer",
 		file: "randomizer",
 		player_x: 10,
 		player_y: -34,
+		hp: 1000,
+		shoots: [
+			[
+				{
+					delay		: 250,
+					addtime		: 0,
+					damage		: 160,
+					pala_bunge	: [35,27],
+					image		: Types.BULLETS.ARMOR1,
+					explode		: Types.EXPLODE.ARMOR1,
+					weight		: 398,
+					friccion	: 0,
+				}
+			],
+			[
+				{
+					delay		: 400,
+					addtime		: 0,
+					damage		: 130,
+					pala_bunge	: [35,27],
+					image		: Types.BULLETS.ARMOR2,
+					explode		: Types.EXPLODE.ARMOR2,
+					weight		: 398,
+					friccion	: 0,
+				},
+				{
+					addtime		: 100,
+					damage		: 130,
+					pala_bunge	: [35,27],
+					image		: Types.BULLETS.ARMOR2,
+					explode		: Types.EXPLODE.ARMOR2,
+					weight		: 398,
+					friccion	: 0,
+				}
+			],
+			[
+				{
+					delay		: 800,
+					addtime		: 0,
+					damage		: 460,
+					pala_bunge	: [50,40],
+					image		: Types.BULLETS.ARMORSS,
+					explode		: Types.EXPLODE.ARMORSS,
+					weight		: 398,
+					friccion	: 0,
+					ss			: true
+				}
+			]
+		],
 		graphics: [
 			[42, 37, 19, 35]
 		],
@@ -3184,76 +3287,54 @@ Types.MOBILES = [
 		file: "Frog2D",
 		player_x: 18,
 		player_y: -28,
+		hp: 1000,
 		shoots: [
 			[
 				{
 					delay		: 250,
 					addtime		: 0,
-					damage		: 140,
-					pala_bunge	: [null,null],
+					damage		: 160,
+					pala_bunge	: [35,27],
 					image		: Types.BULLETS.FROG12,
-					explode		: null,
+					explode		: Types.EXPLODE.MAGE1,
 					weight		: 393,
 					friccion	: 0,
-					addAtEnd	: ["walk"],
-					walk: [
-						{
-							damage		: 75,
-							pala_bunge	: [38,38],
-							addtime		: 200,
-							dir			: 1,
-							image		: Types.BULLETS.FROG12_WALKER,
-							explode		: Types.EXPLODE.MAGE1
-						}
-					]
-				},
+				}
 			],
 			[
 				{
 					delay		: 400,
 					addtime		: 0,
-					damage		: 140,
-					pala_bunge	: [null,null],
+					damage		: 130,
+					pala_bunge	: [35,27],
 					image		: Types.BULLETS.FROG12,
-					explode		: null,
+					explode		: Types.EXPLODE.MAGE1,
 					weight		: 393,
 					friccion	: 0,
-					addAtEnd	: ["walk"],
-					walk: [
-						{
-							damage		: 75,
-							pala_bunge	: [38,38],
-							addtime		: 200,
-							dir			: -1,
-							image		: Types.BULLETS.FROG12_WALKER,
-							explode		: Types.BULLETS.FROG2
-						}
-					]
 				},
+				{
+					delay		: 0,
+					addtime		: 120,
+					damage		: 130,
+					pala_bunge	: [35,27],
+					image		: Types.BULLETS.FROG12,
+					explode		: Types.EXPLODE.MAGE1,
+					weight		: 393,
+					friccion	: 0,
+				}
 			],
 			[
 				{
 					delay		: 800,
 					addtime		: 0,
-					damage		: 140,
-					pala_bunge	: [null,null],
+					damage		: 460,
+					pala_bunge	: [50,40],
 					image		: Types.BULLETS.FROGSS,
-					explode		: null,
+					explode		: Types.EXPLODE.GRUBSS,
 					weight		: 393,
 					friccion	: 0,
-					addAtEnd	: ["walk"],
-					ss			: true,
-					walk: [
-						{
-							damage		: 75,
-							pala_bunge	: [38,38],
-							addtime		: 200,
-							dir			: "auto",
-							image		: Types.BULLETS.FROGSS_WALKER,
-							explode		: Types.EXPLODE.GRUBSS
-						}
-					]
-				},
+					ss			: true
+				}
 			]
 		],
 		graphics: [
@@ -3283,307 +3364,81 @@ Types.MOBILES = [
 		shoots: [
 			[
 				{
-					delay		: 150,
+					delay		: 250,
 					addtime		: 0,
-					damage		: null,
-					pala_bunge	: [null,null],
+					damage		: 160,
+					pala_bunge	: [35,27],
 					image		: Types.BULLETS.KALSIDDON1,
-					explode		: null,
+					explode		: Types.EXPLODE.KALSIDDON,
 					weight		: 398,
-					addAtMaxT	: ["change","bulets"],
-					change	: [
-						{
-							image		: Types.BULLETS.KALSIDDON1_OPEN
-						}
-					],
-					bulets	: [
-						{
-							position	: "time",
-							damage		: 120,
-							pala_bunge	: [35,35],
-							addtime		: -2,
-							image		: Types.BULLETS.KALSIDDON1_TINY,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							power		: 120,
-							ang			: [225,315],
-							killAt		: 500,
-							addAtEnd	: ["bulets"],
-							addAtTime	: [["set",450]],
-							set: [
-								{
-									exp		: null,
-									hole	: []
-								}
-							],
-							bulets	: [
-								{ 
-									position	: "parent",
-									damage		: 120,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDON1_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-								//	weight		: 350,
-									power		: 150,
-								//	friccion	: [350,-350],
-									ang			: "auto"
-								}
-							]
-						},
-						{
-							position	: "time",
-							damage		: 120,
-							pala_bunge	: [35,35],
-							addtime		: -2,
-							image		: Types.BULLETS.KALSIDDON1_TINY,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							friccion	: [-165,165],
-							power		: 120,
-							ang			: [135,45],
-							killAt		: 500,
-							addAtEnd	: ["bulets"],
-							addAtTime	: [["set",450]],
-							set: [
-								{
-									exp		: null,
-									hole	: []
-								}
-							],
-							bulets	: [
-								{
-									position	: "parent",
-									damage		: 120,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDON1_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-									power		: 150,
-								//	weight		: 350,
-								//	friccion	: [350,-350],
-									ang			: "auto"
-								}
-							]
-						},
-					]
+					friccion	: 0
 				}
 			],
 			[
 				{
-					delay		: 360,
+					delay		: 400,
 					addtime		: 0,
-					damage		: null,
-					pala_bunge	: [null,null],
+					damage		: 65,
+					pala_bunge	: [28,22],
 					image		: Types.BULLETS.KALSIDDON2,
-					explode		: null,
+					explode		: Types.EXPLODE.KALSIDDON,
 					weight		: 398,
-					addAtMaxT	: ["change","bulets"],
-					change	: [
-						{
-							image		: Types.BULLETS.KALSIDDON2_OPEN
-						}
-					],
-					bulets	: [
-						{
-							position	: "time",
-							damage		: 110,
-							pala_bunge	: [35,35],
-							image		: Types.BULLETS.KALSIDDON2_TINY,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							power		: 120,
-							ang			: [255,285],
-							killAt		: 500,
-							addAtEnd	: ["bulets"],
-							addAtTime	: [["set",450]],
-							set: [
-								{
-									exp		: null,
-									hole	: []
-								}
-							],
-							bulets	: [
-								{ 
-									position	: "parent",
-									damage		: 110,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDON2_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-									power		: 350,
-								//	friccion	: [-165,165],
-									ang			: "auto"
-								}
-							]
-						},
-						{
-							position	: "time",
-							damage		: 110,
-							pala_bunge	: [35,35],
-							image		: Types.BULLETS.KALSIDDON2_TINY,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							power		: 120,
-							ang			: [195,345],
-							killAt		: 500,
-							addAtEnd	: ["bulets"],
-							addAtTime	: [["set",450]],
-							set: [
-								{
-									exp		: null,
-									hole	: []
-								}
-							],
-							bulets	: [
-								{ 
-									position	: "parent",
-									damage		: 110,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDON2_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-									power		: 350,
-								//	friccion	: [-165,165],
-									ang			: "auto"
-								}
-							]
-						},
-						{
-							position	: "time",
-							damage		: 110,
-							pala_bunge	: [35,35],
-							image		: Types.BULLETS.KALSIDDON2_TINY,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							power		: 120,
-							ang			: [165,15],
-							killAt		: 500,
-							addAtEnd	: ["bulets"],
-							addAtTime	: [["set",450]],
-							set: [
-								{
-									exp		: null,
-									hole	: []
-								}
-							],
-							bulets	: [
-								{ 
-									position	: "parent",
-									damage		: 110,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDON2_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-									power		: 350,
-								//	friccion	: [-165,165],
-									ang			: "auto"
-								}
-							]
-						},
-						{
-							position	: "time",
-							damage		: 110,
-							pala_bunge	: [35,35],
-							image		: Types.BULLETS.KALSIDDON2_TINY,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							power		: 120,
-							ang			: [105,75],
-							killAt		: 500,
-							addAtEnd	: ["bulets"],
-							addAtTime	: [["set",450]],
-							set: [
-								{
-									exp		: null,
-									hole	: []
-								}
-							],
-							bulets	: [
-								{ 
-									position	: "parent",
-									damage		: 110,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDON2_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-									power		: 350,
-								//	friccion	: [-165,165],
-									ang			: "auto"
-								}
-							]
-						},
-					]
+					friccion	: 0
+				},
+				{
+					addtime		: 80,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.KALSIDDON2_TINY,
+					explode		: Types.EXPLODE.KALSIDDON,
+					weight		: 398,
+					friccion	: 0,
+					modifiers	: {
+						y0		: -5,
+						ang		: 2,
+						power	: 10
+					}
+				},
+				{
+					addtime		: 160,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.KALSIDDON2_TINY,
+					explode		: Types.EXPLODE.KALSIDDON,
+					weight		: 398,
+					friccion	: 0,
+					modifiers	: {
+						y0		: -5,
+						ang		: -2,
+						power	: -10
+					}
+				},
+				{
+					addtime		: 240,
+					damage		: 65,
+					pala_bunge	: [28,22],
+					image		: Types.BULLETS.KALSIDDON2,
+					explode		: Types.EXPLODE.KALSIDDON,
+					weight		: 398,
+					friccion	: 0,
+					modifiers	: {
+						y0		: -10,
+						ang		: 4,
+						power	: 15
+					}
 				}
 			],
 			[
 				{
-					delay		: 700,
+					delay		: 800,
 					addtime		: 0,
-					damage		: null,
-					pala_bunge	: [null,null],
+					damage		: 480,
+					pala_bunge	: [50,40],
 					image		: Types.BULLETS.KALSIDDONSS,
-					explode		: null,
+					explode		: Types.EXPLODE.KALSIDDON,
 					weight		: 398,
-					addAtMaxT	: ["change","bulets"],
-					change	: [
-						{
-							image		: Types.BULLETS.KALSIDDONSS_OPEN
-						}
-					],
-					bulets	: [
-						{
-							position	: "time",
-							damage		: 110,
-							pala_bunge	: [35,35],
-							image		: Types.BULLETS.KALSIDDONSS_MED,
-							explode		: Types.EXPLODE.KALSIDDON,
-							weight		: 0,
-							power		: 120,
-							killAt		: 452,
-							ang			: [255,285],
-							addAtTime	: [["bulets",451]],
-							bulets	: [
-								{ 
-									position	: "parent",
-									addtime		: 0,
-									damage		: 110,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDONSS_MED_OPEN,
-									explode		: Types.EXPLODE.KALSIDDON,
-									power		: 150,
-								//	friccion	: [-165,165],
-									ang			: "auto"
-								},
-								{
-									position	: "time",
-									addtime		: 0,
-									damage		: 110,
-									pala_bunge	: [35,35],
-									image		: Types.BULLETS.KALSIDDONSS_TINY,
-									explode		: Types.EXPLODE.KALSIDDON,
-									weight		: 0,
-									power		: 120,
-									ang			: [255,285],
-									killAt		: 500,
-									addAtEnd	: ["bulets"],
-									addAtTime	: [["set",450]],
-									set: [
-										{
-											exp		: null,
-											hole	: []
-										}
-									],
-									bulets	: [
-										{ 
-											position	: "parent",
-											damage		: 110,
-											pala_bunge	: [35,35],
-											image		: Types.BULLETS.KALSIDDONSS_TINY,
-											explode		: Types.EXPLODE.KALSIDDON,
-											power		: 150,
-										//	friccion	: [-165,165],
-											ang			: "auto"
-										}
-									]
-								}
-							]
-						}
-					]
+					friccion	: 0,
+					ss			: true
 				}
 			]
 		],

@@ -405,6 +405,12 @@ jumps:[],
 												self.bonos.teamDamage = [Types.GAMEMSG.team_damage_penalty, self.gold_penalty, self.gp_penalty];
 											} else  {
 												self.bonos.damage = [Types.GAMEMSG.good_shot, self.gold_good, 0];
+												if (shoot.isMirror) {
+													self.bonos.mirror_bonus = [Types.GAMEMSG.mirror_bonus, 50, 2];
+												}
+												if (shoot.isTornado) {
+													self.bonos.hurricane_bonus = [Types.GAMEMSG.hurricane_bonus, 50, 2];
+												}
 											}
 											
 											if (player.hp <= 0) {
@@ -695,62 +701,111 @@ jumps:[],
 					if (Array.isArray(force.cast[cast])) this["_castWeather"+force.cast[cast][0]](shoot,force,force.cast[cast][1])
 					else this["_castWeather"+force.cast[cast]](shoot,force)
 				}
+			} else if (shoot.lastMirror === force.px) {
+				shoot.lastMirror = null;
 			}
 		});
 	}
 	_castWeatherTornado(shoot, force, config) {
-		let side = shoot.a.x > force.px ? "R" : "L";
 		shoot.lastTornado = shoot.lastTornado ? shoot.lastTornado : null;
-	
 		if (shoot.lastTornado !== force.px) {
 			shoot.lastTornado = force.px;
-			shoot.sideTornado = side;
-			shoot.countTornado = 2; // Ensure only one bounce
-		}
-	
-		if (!force.isCollide(shoot.a.x, -10) && shoot.sideTornado !== side && shoot.countTornado > 0) {
-			shoot.countTornado--;
-			shoot.countMirror = 0;
-			shoot.lastMirror = null;
-			config = {
+			shoot.isComplete = true;
+
+			// Instantaneous velocity calculation at entering the vortex:
+			let a = shoot.time / 485;
+			let vx = shoot.v.x + (shoot.friccion * a);
+			let vy = shoot.v.y + (shoot.weight * a);
+
+			let dir = vx >= 0 ? 1 : -1;
+			let newVx = (Math.abs(vx) < 50 ? dir * 150 : vx * 1.15);
+			let newVy = vy - 120; // Upward draft lift
+
+			let newPower = Math.sqrt(newVx * newVx + newVy * newVy);
+			let newAng = Math.atan2(-newVy, newVx) * 180 / Math.PI;
+			if (newAng < 0) newAng += 360;
+
+			let halfW = 25;
+			if (force.power) halfW = Math.max(25, (force.power / 2) + 5);
+			let startX = force.px + (dir * halfW);
+			let startY = shoot.a.y - 15;
+
+			shoot.config = {
 				...config,
-				sideTornado: side,
-				countTornado: shoot.countTornado,
-				lastTornado: shoot.lastTornado
+				x0: startX,
+				y0: startY,
+				ang: Math.round(newAng * 100) / 100,
+				power: Math.round(newPower * 100) / 100,
+				damage: shoot.damage ? Math.round(shoot.damage * 1.25) : null,
+				pala_bunge: shoot.pala_bunge,
+				image: shoot.image,
+				explode: shoot.explode,
+				weight: shoot.weight,
+				friccion: shoot.friccion,
+				wind_power: 0,
+				lastTornado: force.px,
+				stime: shoot.stime + (shoot.time * 2),
+				isTornado: true
 			};
-			this._castWeatherMirror(shoot, force, config);
+			shoot.damage = null;
+			shoot.explode = null;
+
+			this.addbulets(shoot);
 		}
 	}
-	_castWeatherMirror(shoot,force,config) {
-		shoot.lastMirror = shoot.lastMirror?shoot.lastMirror:null
-		shoot.countMirror= shoot.countMirror?shoot.countMirror:0
-		if(shoot.lastMirror !== force.px){
-			shoot.isComplete= true;
-			shoot.config 	= {...config,...{
-				ang			: invert(shoot.v.ang),
-				damage		: shoot.damage,
-				pala_bunge	: shoot.pala_bunge,
-				image		: shoot.image,
-				explode		: shoot.explode,
-				weight		: shoot.weight,
-				friccion	: shoot.friccion,
-				lastMirror	: force.px,
-				countMirror	: shoot.countMirror+1,
-				stime		: shoot.stime+(shoot.time*2),
-				power		: shoot.power,
-			}}
-			shoot.damage 	= null
-			shoot.explode	= null
-		//	console.log("is mirror",{shoot:shoot})
-			if (shoot.config.countMirror<10)this.addbulets(shoot)
-			else {			
+	_castWeatherMirror(shoot, force, config) {
+		shoot.lastMirror = shoot.lastMirror ? shoot.lastMirror : null;
+		shoot.countMirror = shoot.countMirror ? shoot.countMirror : 0;
+
+		const mirrorId = force.px;
+
+		if (shoot.lastMirror !== mirrorId) {
+			shoot.isComplete = true;
+
+			// Instantaneous velocity calculation at impact:
+			let a = shoot.time / 485;
+			let vx = shoot.v.x + (shoot.friccion * a);
+			let vy = shoot.v.y + (shoot.weight * a);
+
+			// Invert horizontal velocity for vertical reflection plane
+			let newVx = -vx;
+			let newVy = vy;
+
+			let newPower = Math.sqrt(newVx * newVx + newVy * newVy);
+			let newAng = Math.atan2(-newVy, newVx) * 180 / Math.PI;
+			if (newAng < 0) newAng += 360;
+
+			// Nudge start position away from barrier outside 10px collision zone
+			let startX = shoot.a.x + (newVx < 0 ? -15 : 15);
+			let startY = shoot.a.y;
+
+			shoot.config = {
+				...config,
+				x0: startX,
+				y0: startY,
+				ang: Math.round(newAng * 100) / 100,
+				power: Math.round(newPower * 100) / 100,
+				damage: shoot.damage ? Math.round(shoot.damage * 1.2) : null,
+				pala_bunge: shoot.pala_bunge,
+				image: shoot.image,
+				explode: shoot.explode,
+				weight: shoot.weight,
+				friccion: shoot.friccion,
+				wind_power: 0,
+				lastMirror: mirrorId,
+				countMirror: shoot.countMirror + 1,
+				stime: shoot.stime + (shoot.time * 2),
+				isMirror: true
+			};
+			shoot.damage = null;
+			shoot.explode = null;
+
+			if (shoot.config.countMirror < 10) {
+				this.addbulets(shoot);
+			} else {
 				this.addGroundHole(shoot);
 				shoot.groundCollide = true;
 			}
-		}
-
-		function invert(ang){
-			return ((ang<=180)?180:540)-ang
 		}
 	}
 	_castWeatherLightning(shoot,force,config) {
@@ -939,16 +994,20 @@ jumps:[],
 	addbulets(data){
 		let self	= this;
 		let pos;
-		switch (data.config.position) {
-			case "parent":
-				pos	= data.a;
-				break;
-			case "time": 
-				pos	= data.getPosAtTime(data.config.stime/2);
-				break;
-			default:
-				pos	= data.config.posicion;
-				break;
+		if (data.config && data.config.x0 !== undefined && data.config.y0 !== undefined) {
+			pos = { x: data.config.x0, y: data.config.y0 };
+		} else {
+			switch (data.config.position) {
+				case "parent":
+					pos	= data.a;
+					break;
+				case "time": 
+					pos	= data.getPosAtTime(data.config.stime/2);
+					break;
+				default:
+					pos	= data.config.posicion || data.a;
+					break;
+			}
 		}
 	//	const ftime = (data.time+data.stime)-data.config.stime> 200?(data.time+data.stime)-data.config.stime:200;
 		const fang	= data.GetAngleAtTime(data.config.stime/2);

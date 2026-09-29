@@ -65,6 +65,7 @@ module.exports = class Shoot {
 			dir				: "RIGHT",		//
 			map				: null,			//
 			walk			: false,
+			isWalking		: false,
 			bonos			: true,	
 			walk_max		: 0,
 			walk_dist		: 0,
@@ -165,7 +166,7 @@ module.exports = class Shoot {
 
 	update() {
 		this.time++;
-		if (this.walk) this.a = this.GetPosForWalking(); 
+		if (this.isWalking && this.map) this.a = this.GetPosForWalking(); 
 		else this.a = this.getPosAtTime();
 	}
 
@@ -176,43 +177,44 @@ module.exports = class Shoot {
 			y: Math.ceil(this.y0 + this.v.y * a + this.weight * a * a / 2),
 		};
 	}
-	GetPosForWalking  () {
-		//   a, b, c
+	GetPosForWalking() {
 		if (!this.a)
 			this.a = {x:this.x0, y:this.y0};
+		if (!this.map)
+			return this.a;
 
-        let pop = this.dir == "LEFT" ? this.a.x - 1 : this.a.x + 1;
-        if (0 > pop || pop >= this.map.w)
-            return {
-                x: a,
-                y: this.ay,
-                stuck: !0
-            };
-        if (this.map.IsPixel(pop, this.a.y)) {
-            for (c = this.a.y; c > this.a.y - 10; c--)
-                if (!this.map.IsPixel(pop, c))
-                    return {
-                        x: pop,
-                        y: c
-                    };
-            return {
-                x: a,
-                y: this.a.y,
-                stuck: !0
-            }
-        }
-        for (c = this.a.y + 1; c < this.map.h; c++)
-            if (this.map.IsPixel(pop, c))
-                return {
-                    x: pop,
-                    y: c - 1
-                };
-        return {
-            x: pop,
-            y: this.map.h + 100,
-            fall_and_die: !0
-        }
-    }
+		let pop = this.dir == "LEFT" ? this.a.x - 1 : this.a.x + 1;
+		if (0 > pop || pop >= this.map.w)
+			return {
+				x: this.a.x,
+				y: this.a.y,
+				stuck: true
+			};
+		if (this.map.IsPixel(pop, this.a.y)) {
+			for (let c = this.a.y; c > this.a.y - 10; c--)
+				if (!this.map.IsPixel(pop, c))
+					return {
+						x: pop,
+						y: c
+					};
+			return {
+				x: this.a.x,
+				y: this.a.y,
+				stuck: true
+			};
+		}
+		for (let c = this.a.y + 1; c < this.map.h; c++)
+			if (this.map.IsPixel(pop, c))
+				return {
+					x: pop,
+					y: c - 1
+				};
+		return {
+			x: pop,
+			y: this.map.h + 100,
+			fall_and_die: true
+		};
+	}
 
 	GetAngleAtTime(a) {
 		var b = this.getPosAtTime(a - 5);

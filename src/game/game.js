@@ -422,7 +422,7 @@ module.exports = class Game {
 		this.mobileDelay = mobile_data.delay + time * 10;
 		if (account.player.TELEPORT == 1) {
 			this.thor.active = false;
-			let data = { x0: pfinal.x, y0: pfinal.y, ang: ang, power: power, pala_bunge: [null, null], weight: 398, friccion: 0, damage: null, type: type, wind_ang: self.wind_angle, wind_power: self.wind_power, stime: 0, account: account, shootId: 0, bonos: false }
+			let data = { x0: pfinal.x, y0: pfinal.y, ang: ang, power: power, pala_bunge: [null, null], weight: 398, friccion: 0, damage: null, type: type, wind_ang: self.wind_angle, wind_power: self.wind_power, stime: 0, account: account, shootId: 0, bonos: false, map: self.map }
 			self.setTurnDelay({ delay: 0 }, account);
 			self.world.shoots[self.world.shoots_count] = new Shoot(data);
 			this.world.shoots_count = 1;
@@ -450,7 +450,7 @@ module.exports = class Game {
 		
 		if(shootCount==0) self.setTurnDelay(shootData[0],account);
 		shootData.forEach(shootConfig => {
-			let data = {x0:pfinal.x, y0:pfinal.y, ang:ang, power:power, type:type, wind_ang:self.wind_angle, wind_power:self.wind_power, stime:shootConfig.addtime + stime,account:account,shootId:shootId}
+			let data = {x0:pfinal.x, y0:pfinal.y, ang:ang, power:power, type:type, wind_ang:self.wind_angle, wind_power:self.wind_power, stime:shootConfig.addtime + stime,account:account,shootId:shootId,map:self.map}
 			data = {...data,...shootConfig}
 			if (Array.isArray(data.addOrbit)&&Array.isArray(data.addOrbit[1])){
 				data.orbit		= [
