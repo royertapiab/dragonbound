@@ -159,12 +159,11 @@ module.exports = class Room {
             return null;
        
         var type = Types.CHAT_TYPE.NORMAL;
-        if (account.player.power_user === 1)
-            type = Types.CHAT_TYPE.POWER_USER;
-        
-
         if (account.player.gm === 1)
             type = Types.CHAT_TYPE.GM;
+
+        if (account.player.power_user === 1)
+            type = Types.CHAT_TYPE.POWER_USER;
 
         if (account.player.rank === 28 && account.player.gm === 1 || account.player.rank === 29 && account.player.gm === 1 || account.player.rank === 30 && account.player.gm === 1)
             type = Types.CHAT_TYPE.SPECIAL;

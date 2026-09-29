@@ -3420,11 +3420,11 @@ module.exports = class Account {
 			var save = true;
 			var show = true;
 
-			if (self.player.power_user === 1)
-				type = Types.CHAT_TYPE.POWER_USER;
-			
 			if (self.player.gm === 1)
 				type = Types.CHAT_TYPE.GM;
+
+			if (self.player.power_user === 1)
+				type = Types.CHAT_TYPE.POWER_USER;
 			
 			if (self.player.rank === 28 && self.player.gm === 1 || self.player.rank === 29 && self.player.gm === 1 || self.player.rank === 30 && self.player.gm === 1)
 				type = Types.CHAT_TYPE.SPECIAL;
@@ -3587,7 +3587,7 @@ module.exports = class Account {
 
     update(tiempo1,tiempo2) {
         var self = this;
-        if (self.room) {
+        if (self.room && self.room.game && self.room.game.map) {
             var map = self.room.game.map;
             if (self.player.x > map.w || self.player.y > map.h) {
                 self.player.is_alive = 0;

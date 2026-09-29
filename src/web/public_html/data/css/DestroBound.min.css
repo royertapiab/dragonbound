@@ -303,11 +303,13 @@ a:active {
 }
 
 .zotata-chat-type4 {
-    color: #eef
+    color: #ff3b3b;
+    text-shadow: #800000 -1px 0 2px,#800000 0 1px 2px,#800000 1px 0 2px,#800000 0 -1px 2px;
+    filter: progid:DXImageTransform.Microsoft.Glow(Strength=1,Color=#800000)
 }
 
 #gameChatHtml .zotata-chat-type4 {
-    color: white;
+    color: #ff4d4d;
     text-shadow: black -1px 0 2px,black 0 1px 2px,black 1px 0 2px,black 0 -1px 2px;
     filter: progid:DXImageTransform.Microsoft.Glow(Strength=1,Color=#000000)
 }
@@ -361,7 +363,13 @@ a:active {
 }
 
 .zotata-chat-type11 {
-    color: #f80;
+    color: #ff7777;
+    text-shadow: #800000 -1px 0 2px,#800000 0 1px 2px,#800000 1px 0 2px,#800000 0 -1px 2px;
+    filter: progid:DXImageTransform.Microsoft.Glow(Strength=1,Color=#800000)
+}
+
+#gameChatHtml .zotata-chat-type11 {
+    color: #ff7777;
     text-shadow: black -1px 0 2px,black 0 1px 2px,black 1px 0 2px,black 0 -1px 2px;
     filter: progid:DXImageTransform.Microsoft.Glow(Strength=1,Color=#000000)
 }
@@ -2552,8 +2560,13 @@ a:active {
 }
 
 .bg1 {
-    background-color: #ffd !important;
-    box-shadow: 0 0 8px 4px #f04
+    background-color: #fff0f0 !important;
+    border: 1px solid #ff0044 !important;
+    box-shadow: 0 0 8px 4px #ff0044 !important;
+}
+
+.powerUserName {
+    color: #ff3b3b !important;
 }
 
 .bg2 {

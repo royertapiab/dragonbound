@@ -18872,7 +18872,7 @@
                     if ($(this).html().split("</span> ").pop() == b) {
                         var e = $(this).parents().children(t)
                           , f = $(this).parents().children(u);
-                        c == CHAT_TYPE_POWER_USER ? e.addClass("bg1") : e.removeClass("bg1");
+                        c == CHAT_TYPE_POWER_USER || c == CHAT_TYPE_POWER_USER_TEAM ? e.addClass("bg1") : e.removeClass("bg1");
                         c == CHAT_TYPE_GM ? e.addClass("bg2") : e.removeClass("bg2");
                         f.stop(!0, !0).fadeOut("slow");
                         e.stop(!0, !0).hide("slow").promise().done(function() {
@@ -27015,7 +27015,7 @@
         CPlayer.prototype.Chat = function(a, b) {
             var c = this.divBalloon
               , d = this.divBalloonTip;
-            4 == b ? c.addClass("bg1") : c.removeClass("bg1");
+            4 == b || 11 == b ? c.addClass("bg1") : c.removeClass("bg1");
             5 == b ? c.addClass("bg2") : c.removeClass("bg2");
             c.removeClass("text_anim");
             d.removeClass("text_anim");
@@ -28760,6 +28760,7 @@
                     q.change(r, AVATAR_TYPE_BACKGROUND),
                     q.change(b.avatars[MY_AVATARS_FOREGROUND], AVATAR_TYPE_FOREGROUND)) : g_room_slot_graphic2[m] = new CPlayerGraphic(n + " .roomPlayerMobile",b.mobile,b.avatars[MY_AVATARS_HEAD],b.avatars[MY_AVATARS_BODY],b.avatars[MY_AVATARS_EYES],b.avatars[MY_AVATARS_FLAG],"A" == b.team,r,b.avatars[MY_AVATARS_FOREGROUND]);
                     p.children(".roomPlayerName").html(BuildRelationRankCountryGuildName(b.relationship_status, b.rank, b.country, b.guild, b.game_id));
+                    b.power_user ? p.children(".roomPlayerName").addClass("powerUserName") : p.children(".roomPlayerName").removeClass("powerUserName");
                     if (b.user_id == a.user_id) {
                         //TEST STATS Mobile
                         var idmobileagd=(b.mobile == -1) ? 0 : b.mobile;
@@ -34575,7 +34576,7 @@
         Player2.prototype.Chat = function(a, b) {
             if (this.is_alive) {
                 var c = 0;
-                4 == b ? c = 1 : 5 == b && (c = 2);
+                4 == b || 11 == b ? c = 1 : 5 == b && (c = 2);
                 this.player_sprite.player_info.CreateTextBubble(a, c)
             }
         }
@@ -35243,7 +35244,7 @@
             this.text_sprite.y = -e - 2 * h;
             this.text_sprite.scale.x = this.text_sprite.scale.y = .25;
             var k, m;
-            1 == d ? (d = 15663086,
+            1 == d ? (d = 16773360,
             k = 16711680,
             m = 4) : 2 == d ? (d = 16777181,
             k = 65280,
