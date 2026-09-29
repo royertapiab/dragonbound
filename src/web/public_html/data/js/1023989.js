@@ -2026,7 +2026,7 @@
                         while ((o = i.handlers[n++]) && !u.isImmediatePropagationStopped())
                             u.rnamespace && !1 !== o.namespace && !u.rnamespace.test(o.namespace) || (u.handleObj = o,
                             u.data = o.data,
-                            void 0 !== (r = ((S.event.special[o.origType] || {}).handle || o.handler).apply(i.elem, s)) && !1 === (u.result = r) && (u.preventDefault(),
+                            void 0 !== (r = (((S.event.special[o.origType] || {}).handle || o.handler) && ((S.event.special[o.origType] || {}).handle || o.handler).apply ? ((S.event.special[o.origType] || {}).handle || o.handler).apply(i.elem, s) : void 0)) && !1 === (u.result = r) && (u.preventDefault(),
                             u.stopPropagation()))
                     }
                     return c.postDispatch && c.postDispatch.call(this, u),
@@ -2213,7 +2213,7 @@
                 handle: function(e) {
                     var t, n = e.relatedTarget, r = e.handleObj;
                     return n && (n === this || S.contains(this, n)) || (e.type = r.origType,
-                    t = r.handler.apply(this, arguments),
+                    t = (r && r.handler && r.handler.apply) ? r.handler.apply(this, arguments) : void 0,
                     e.type = i),
                     t
                 }
@@ -4605,7 +4605,7 @@
             if (!b.dontSayHello) {
                 if (navigator.userAgent.toLowerCase().indexOf("chrome") > -1) {
                     var c = ["%c %c %c Pixi.js " + b.VERSION + " - " + a + "  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ ", "background: #ff66a5", "background: #ff66a5", "color: #ff66a5; background: #030307;", "background: #ff66a5", "background: #ffc3dc", "background: #ff66a5", "color: #ff2424; background: #fff", "color: #ff2424; background: #fff", "color: #ff2424; background: #fff"];
-                    console.log.apply(console, c)
+                    console && console.log && console.log.apply && console.log.apply(console, c)
                 } else
                     window.console && console.log("Pixi.js " + b.VERSION + " - http://www.pixijs.com/");
                 b.dontSayHello = !0
@@ -15266,8 +15266,8 @@
           , GAME_MODE_BOSS = 1
           , GAME_MODE_SAME = 2
           , GAME_MODE_SCORE = 3
-          , GAME_MODE_NAMES = ["NORMAL", "BOSS", "SAME"]
-          , GAME_MODE_NAMES_LOWER = ["Normal", "Boss", "Same"]
+          , GAME_MODE_NAMES = ["NORMAL", "BOSS", "SAME", "SCORE"]
+          , GAME_MODE_NAMES_LOWER = ["Normal", "Boss", "Same", "Score"]
           , GAME_MODES = GAME_MODE_NAMES.length
           , CHAT_TYPE_NORMAL = 0
           , CHAT_TYPE_DEAD = 2
@@ -17868,18 +17868,31 @@
                     wav: !!b.canPlayType('audio/wav; codecs="1"'),
                     mp3: !!b.canPlayType('audio/mpeg; codecs="mp3"')
                 };
-                var b = this.context = new AudioContext
-                  , c = this.gainNode = b.createGain()
-                  , d = this.volumeSounds / 100;
-                c.gain.setTargetAtTime(d * d, 0, .01);
-                c.connect(b.destination);
-                $(document).one("keydown mousedown click touchstart", function() {
-                    "suspended" == a.context.state && "suspended" == a.context.state && a.context.resume().then(function() {
-                        return dlog("[DragonAudio] Audio context resumed")
-                    })["catch"](function(a) {
-                        return dlog(a)
-                    })
-                })
+                var AC = window.AudioContext || window.webkitAudioContext;
+                this.ensureContext = function() {
+                    if (!a.context && AC) {
+                        try {
+                            a.context = new AC();
+                            a.gainNode = a.context.createGain();
+                            var d = a.volumeSounds / 100;
+                            a.gainNode.gain.setTargetAtTime(d * d, 0, .01);
+                            a.gainNode.connect(a.context.destination);
+                        } catch(e) {}
+                    }
+                    if (a.context && a.context.state === "suspended") {
+                        a.context.resume().then(function() {
+                            typeof dlog === "function" && dlog("[DragonAudio] Audio context resumed");
+                        }).catch(function() {});
+                    }
+                    return a.context;
+                };
+                if (navigator.userActivation && navigator.userActivation.hasBeenActive) {
+                    this.ensureContext();
+                } else {
+                    $(document).one("keydown mousedown click touchstart pointerdown", function() {
+                        a.ensureContext();
+                    });
+                }
             } else
                 this.volumeSounds = 0;
             void 0 !== document.hidden && document.addEventListener("visibilitychange", function() {
@@ -17912,7 +17925,12 @@
                             e.isDownloading = !1,
                             d.GetFile(a, e.types.slice(1), c);
                         b.arrayBuffer().then(function(b) {
-                            (b = d.context.decodeAudioData(b, function(b) {
+                            var ctx = d.ensureContext ? d.ensureContext() : d.context;
+                            if (!ctx) {
+                                e.isDownloading = !1;
+                                return;
+                            }
+                            (b = ctx.decodeAudioData(b, function(b) {
                                 e.buffer = b;
                                 e.isReady = !0;
                                 delete e.isDownloading;
@@ -17949,12 +17967,14 @@
             b = void 0 === b ? {} : b;
             var c = this;
             if (this.is_webaudio_supported) {
+                var ctx = this.ensureContext ? this.ensureContext() : this.context;
+                if (!ctx) return;
                 var d = get_time();
                 "string" == typeof b && (b = {
                     types: [b]
                 });
-                if ("suspended" == this.context.state)
-                    this.context.resume().then(function() {
+                if ("suspended" == ctx.state)
+                    ctx.resume().then(function() {
                         get_time() < d + TIME_SECOND && c.Play(a, b)
                     });
                 else if (0 !== this.volumeSounds) {
@@ -17966,14 +17986,14 @@
                         if (!(b.avoidSameStart && h.lastPlayTime && m > h.lastPlayTime - 20 && m < h.lastPlayTime + 20)) {
                             if (k > d + TIME_SECOND)
                                 return warn(a, "- too much time passed");
-                            e = c.context.createBufferSource();
+                            e = ctx.createBufferSource();
                             e.buffer = h.buffer;
-                            e.connect(c.gainNode);
+                            if (c.gainNode) e.connect(c.gainNode);
                             b.loop && (e.loop = !0);
                             b.singlePlay && h.source && h.source.stop();
                             h.source = e;
                             h.lastPlayTime = m;
-                            e.start(b.when ? c.context.currentTime + b.when / 1E3 : void 0)
+                            e.start(b.when ? ctx.currentTime + b.when / 1E3 : void 0)
                         }
                     });
                     return function() {
@@ -18037,7 +18057,7 @@
             0 <= a && 100 >= a && (a = Math.round(a),
             localStorage.volumeSounds = this.volumeSounds = a,
             a /= 100,
-            this.is_webaudio_supported && this.gainNode.gain.setTargetAtTime(a * a, 0, .01))
+            this.is_webaudio_supported && this.gainNode && this.gainNode.gain && this.gainNode.gain.setTargetAtTime(a * a, 0, .01))
         }
         ;
         DragonAudio.prototype.SetMusicVolume = function(a, b) {
@@ -18060,7 +18080,6 @@
           , DEBUG = "dev" == SERVER_TYPE
           , debug = DEBUG
           , query = ParseQuery();
-        DEBUG || console.log("%c /--------------------------------------------------------------------------------\\ \n |   (:         DestroBound - HTML5 Social Realtime Multiplayer Game         :)   | \n +--------------------------------------------------------------------------------+ \n | Copyright (c) 2012-2030, Made by Zotata. All rights reserved.                  | \n | You are not allowed to change or use this code or any part of it for anything. | \n | Trying to cheat the game will get you banned, please behave and have fun.      | \n ---------------------------------------------------------------------------------/ \n", "background: #222; color: #3f3");
         console.clear = void 0;
         "undefined" === typeof DragonAPI && (DragonAPI = void 0);
         var dlog = DEBUG ? log : function() {}
@@ -18493,7 +18512,7 @@
         function IsEmojiSupported() {
             var a = document.createElement("canvas");
             a.width = a.height = 64;
-            var b = a.getContext("2d");
+            var b = a.getContext("2d", { willReadFrequently: true });
             b.fillStyle = "#000";
             b.font = "64px Emoji, Arial, sans-serif";
             b.fillText("\ud83e\udd14", -12, 54.4);
@@ -29070,7 +29089,7 @@
             var f = document.createElement("canvas");
             f.width = d;
             f.height = e;
-            for (var h = f.getContext("2d"), k = h.getImageData(0, 0, d, e), m = k.data, n = "string" == typeof a ? "1" : !0, p = 0; p < e; p++)
+            for (var h = f.getContext("2d", { willReadFrequently: true }), k = h.getImageData(0, 0, d, e), m = k.data, n = "string" == typeof a ? "1" : !0, p = 0; p < e; p++)
                 for (var q = 0; q < d; q++) {
                     var r = 4 * (p * d + q);
                     m[r] = m[r + 1] = m[r + 2] = 0;

@@ -864,15 +864,47 @@ router.post('/ajaxRegister', function (req, res) {
 });
 
 router.get('/w2', function (req, res) {
-    res.setHeader('Content-Type', 'application/json');	
-    var data = [86, 0, 0, [["All","",false,"normal"],0,"",2,35,0,27,""], /*200%gps*/
-	/*[["Battle Off","Avatar Off",true,"Holliday"],1,9003,20,100,26,27,""],
-	[["Betting","Special Server",true,"gm"],4,9003,20,100,26,27,26,27,""],
-	[["Prix BigFoot","Avatar On",false,"bunge"],2,9003,20,100, 26, 27,""],0,
-	[["ZONA BUNGE","",true,"prix"],6,9003,20,100, 26, 27,1621573680000]*/,0,0,0,0,0,0,1623339720117,parseInt(Date.now())
-    ];
+    res.setHeader('Content-Type', 'application/json');
     req.session.touch();
-    res.send(JSON.stringify(data));
+
+    var counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    function respond() {
+        var data = [
+            86, 0, 0,
+            [["All", "Free For All", false, "normal"], 0, "", counts[1], 500, 0, 27, ""],
+            [["Bunge", "Zona Bunge", false, "bunge"], 0, "", counts[2], 500, 0, 27, ""],
+            [["Battle", "Avatar On", true, "battle"], 0, "", counts[3], 500, 0, 27, ""],
+            [["Holiday", "Special Server", true, "gm"], 1, "", counts[4], 500, 0, 27, ""],
+            [["Prix", "Torneo Prix", false, "prix"], 2, "", counts[5], 500, 0, 27, ""],
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            1623339720117,
+            parseInt(Date.now())
+        ];
+        res.send(JSON.stringify(data));
+    }
+
+    if (req.db && req.db.connection) {
+        req.db.connection.getConnection().then(function (conn) {
+            conn.query("SELECT Id, minUser FROM servidores WHERE Id <= 5").then(function (result) {
+                conn.release();
+                var rows = result[0];
+                if (rows && rows.length) {
+                    rows.forEach(function (r) {
+                        counts[r.Id] = Math.max(0, parseInt(r.minUser) || 0);
+                    });
+                }
+                respond();
+            }).catch(function (e) {
+                conn.release();
+                respond();
+            });
+        }).catch(function () {
+            respond();
+        });
+    } else {
+        respond();
+    }
 });
 
 module.exports = router;

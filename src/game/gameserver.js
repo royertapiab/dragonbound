@@ -92,7 +92,7 @@ module.exports = class GameServer {
                   data.push(['Anota muy bien tu Pin User, te servira para distintos problemas ==-> ['+account.player.my_pin_user+']', '', 9]);
                 }
                 data.push(['Bienvenido: '+account.player.game_id+' :)  ', '', 9]);
-				data.push(['Hola '+account.player.game_id+' enteraté de nuestro nuevo (gift) Evento (gift) en => https://destrobound.com/event :)', '', 17]);
+				data.push(['Hola '+account.player.game_id+' enteraté de nuestro nuevo (gift) Evento (gift) en => https://gunbound.aljania.com/event :)', '', 17]);
                 //data.push(['(trophy) Special Prix Halloween | Para más info: ya.mba/7df | 31 de octubre (trophy)', '', 9]);
                 account.send([Types.SERVER_OPCODE.room_state, [0, data], 1]);
             }
