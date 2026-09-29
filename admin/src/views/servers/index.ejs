@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Action Controls Section -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Acciones de Control de Servicios
+                    </h3>
+
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <form action="/servers/restart-game" method="POST" style="margin: 0;" onsubmit="return confirm('¿Reiniciar el Servidor de Juego (WebSocket 9001)?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-danger">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                                Reiniciar Game Server (9001)
+                            </button>
+                        </form>
+
+                        <form action="/servers/restart-web" method="POST" style="margin: 0;" onsubmit="return confirm('¿Reiniciar el Servidor Web (HTTP 3000)?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-warning">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                                Reiniciar Web Server (3000)
+                            </button>
+                        </form>
+
+                        <form action="/servers/restart-scheduler" method="POST" style="margin: 0;" onsubmit="return confirm('¿Reiniciar el Programador de Tareas (Scheduler)?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-secondary">
+                                Reiniciar Scheduler
+                            </button>
+                        </form>
+
+                        <form action="/servers/run-rankings" method="POST" style="margin: 0;" onsubmit="return confirm('¿Forzar el recálculo y actualización de todos los rangos ahora?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 20V10"></path>
+                                    <path d="M12 20V4"></path>
+                                    <path d="M6 20v-6"></path>
+                                </svg>
+                                Recalcular Rangos Ahora
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="section-header">
+                    <h2 class="section-title">Estado de la Infraestructura</h2>
+                </div>
+
+                <div class="services-grid" style="margin-bottom: 24px;">
+                    <!-- Game Server -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.gameServer.name %></span>
+                            <span class="status-pill <%= services.gameServer.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.gameServer.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Puerto TCP: <%= services.gameServer.port %> (WebSocket)
+                        </div>
+                    </div>
+
+                    <!-- Web Server -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.webServer.name %></span>
+                            <span class="status-pill <%= services.webServer.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.webServer.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Puerto TCP: <%= services.webServer.port %> (HTTP)
+                        </div>
+                    </div>
+
+                    <!-- Scheduler -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.scheduler.name %></span>
+                            <span class="status-pill <%= services.scheduler.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.scheduler.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            PIDs: <%= services.scheduler.pids.join(', ') || 'N/A' %>
+                        </div>
+                    </div>
+
+                    <!-- MariaDB -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.database.name %></span>
+                            <span class="status-pill <%= services.database.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.database.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Puerto TCP: <%= services.database.port %> (SQL)
+                        </div>
+                    </div>
+
+                    <!-- Nginx -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.nginx.name %></span>
+                            <span class="status-pill <%= services.nginx.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.nginx.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Proxy HTTPS: 443 / HTTP: 80 / Admin: 8443
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Host Resources -->
+                <div class="section-header">
+                    <h2 class="section-title">Hardware & Recursos del Host</h2>
+                </div>
+
+                <div class="system-grid" style="margin-bottom: 24px;">
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Carga de CPU (Load Avg)</span>
+                            <span class="monitor-value"><%= system.loadAverage[0] %></span>
+                        </div>
+                        <div class="monitor-footer" style="margin-top: 10px;">
+                            <span>1m: <%= system.loadAverage[0] %> &bull; 5m: <%= system.loadAverage[1] %> &bull; 15m: <%= system.loadAverage[2] %></span>
+                            <span><%= system.cpuCount %> Core(s)</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-dim); margin-top: 6px;">
+                            <%= system.cpuModel %>
+                        </div>
+                    </div>
+
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Memoria RAM</span>
+                            <span class="monitor-value"><%= system.ram.percent %>%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar <%= system.ram.percent > 85 ? 'gold' : 'blue' %>" style="width: <%= system.ram.percent %>%;"></div>
+                        </div>
+                        <div class="monitor-footer">
+                            <span>Usado: <%= system.ram.usedGb %> GB</span>
+                            <span>Total: <%= system.ram.totalGb %> GB</span>
+                        </div>
+                    </div>
+
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Disco Raíz (/)</span>
+                            <span class="monitor-value"><%= system.disk.percent %>%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar <%= system.disk.percent > 85 ? 'gold' : 'green' %>" style="width: <%= system.disk.percent %>%;"></div>
+                        </div>
+                        <div class="monitor-footer">
+                            <span>Usado: <%= system.disk.usedGb %> GB</span>
+                            <span>Total: <%= system.disk.totalGb %> GB</span>
+                        </div>
+                    </div>
+
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Uptime del Servidor</span>
+                            <span class="monitor-value"><%= system.uptime %></span>
+                        </div>
+                        <div class="monitor-footer" style="margin-top: 10px;">
+                            <span>Host: <%= system.hostname %></span>
+                            <span>OS: <%= system.platform %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channels Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Canales y Mundos Activos (Multiworld)</h3>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Canal</th>
+                                <th>Nombre</th>
+                                <th>Modo de Juego</th>
+                                <th>Regla de Stats</th>
+                                <th>Capacidad Máxima</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% channels.forEach(ch => { %>
+                                <tr>
+                                    <td><strong>#<%= ch.id %></strong></td>
+                                    <td><span style="font-weight: 700; color: #fff;"><%= ch.name %></span></td>
+                                    <td><span class="role-badge MODERATOR"><%= ch.mode %></span></td>
+                                    <td><%= ch.type %></td>
+                                    <td><%= ch.max %> Jugadores</td>
+                                    <td>
+                                        <span class="status-pill online">
+                                            <span class="status-dot"></span> Online
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

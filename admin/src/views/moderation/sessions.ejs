@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Navigation Tabs -->
+                <div class="tabs-nav">
+                    <a href="/moderation" class="tab-btn">Cuentas Sancionadas</a>
+                    <a href="/moderation/ip-bans" class="tab-btn">Bloqueo de IPs</a>
+                    <a href="/moderation/sessions" class="tab-btn active">Sesiones Online (Kick)</a>
+                </div>
+
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">
+                            Jugadores Conectados Actualmente (<%= sessions.length %> Online)
+                        </h3>
+
+                        <a href="/moderation/sessions" class="btn btn-sm btn-secondary">
+                            Refrescar Lista
+                        </a>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Account ID</th>
+                                <th>Game ID</th>
+                                <th>Usuario Login</th>
+                                <th>Rango</th>
+                                <th>Dirección IP</th>
+                                <th>Oro / Cash</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (sessions && sessions.length > 0) { %>
+                                <% sessions.forEach(s => { %>
+                                    <tr>
+                                        <td>#<%= s.account_id %></td>
+                                        <td>
+                                            <a href="/players/<%= s.game_user_id %>" style="color: #60a5fa; font-weight: 700; text-decoration: none;">
+                                                <%= s.game_id %>
+                                            </a>
+                                            <% if (s.gm === 1) { %>
+                                                <span class="role-badge GM" style="font-size: 10px; margin-left: 4px;">GM</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= s.Username %></td>
+                                        <td>
+                                            <% const rInfo = getRankInfo(s.rank); %>
+                                            <span class="role-badge MODERATOR" style="font-size: 11px;">
+                                                <%= rInfo.name %>
+                                            </span>
+                                        </td>
+                                        <td><code><%= s.IP %></code></td>
+                                        <td>
+                                            <span style="color: var(--gold);"><%= Number(s.gold).toLocaleString() %> G</span> / 
+                                            <span style="color: #34d399;"><%= Number(s.cash).toLocaleString() %> C</span>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <form action="/moderation/sessions/<%= s.account_id %>/kick" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('¿Expulsar la sesión de este jugador?');">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="btn btn-sm btn-warning">
+                                                    Expulsar (Kick)
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No hay ningún jugador conectado en este momento.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

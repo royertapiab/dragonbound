@@ -1,0 +1,27 @@
+<% if (typeof flash !== 'undefined') { %>
+    <% if (flash.success) { %>
+        <div class="alert alert-success" style="margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 14px 18px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 13.5px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span><%= flash.success %></span>
+            </div>
+            <button type="button" onclick="this.parentElement.style.display='none'" style="background:none; border:none; color: #6ee7b7; cursor:pointer; font-size: 18px;">&times;</button>
+        </div>
+    <% } %>
+    <% if (flash.error) { %>
+        <div class="alert alert-danger" style="margin-bottom: 20px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 14px 18px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 13.5px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span><%= flash.error %></span>
+            </div>
+            <button type="button" onclick="this.parentElement.style.display='none'" style="background:none; border:none; color: #fca5a5; cursor:pointer; font-size: 18px;">&times;</button>
+        </div>
+    <% } %>
+<% } %>

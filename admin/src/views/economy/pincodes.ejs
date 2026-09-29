@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Navigation Tabs -->
+                <div class="tabs-nav">
+                    <a href="/economy" class="tab-btn">Resumen & Fondos</a>
+                    <a href="/economy/pincodes" class="tab-btn active">Códigos PIN / Vouchers</a>
+                </div>
+
+                <div class="form-grid-2" style="margin-bottom: 24px;">
+                    <!-- Generate Pin Code Card -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <h3 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            Generar Nuevo Código PIN
+                        </h3>
+
+                        <form action="/economy/pincodes" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Código Personalizado (Dejar vacío para auto-generar formato oficial)</label>
+                                <input type="text" name="pin" class="form-control" placeholder="Ej. DB50-XXXX-XXXX-XXXX">
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Monto de Cash</label>
+                                    <input type="number" name="rode" class="form-control" placeholder="Ej. 20000" min="1000" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Vendedor / Referencia</label>
+                                    <input type="text" name="seller" class="form-control" value="DragonBound Official" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Generar PIN de Canje
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Instructions Card -->
+                    <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center;">
+                        <h4 style="font-size: 14.5px; font-weight: 700; color: #60a5fa; margin-bottom: 8px;">
+                            ¿Cómo funcionan los Códigos PIN?
+                        </h4>
+                        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                            Los códigos PIN permiten canjear Cash directamente en la web del juego (sección <code>/pin</code>). Cada código tiene un estado:
+                        </p>
+                        <ul style="font-size: 12.5px; color: var(--text-dim); margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                            <li><strong style="color: var(--success);">ON:</strong> Disponible para canjear una única vez.</li>
+                            <li><strong style="color: var(--danger);">OFF:</strong> Ya canjeado por un jugador.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PIN List Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Códigos PIN Registrados (<%= pagination.total.toLocaleString() %>)</h3>
+
+                        <div class="filter-group">
+                            <a href="/economy/pincodes" class="btn btn-sm <%= !filters.state ? 'btn-primary' : 'btn-secondary' %>">Todos</a>
+                            <a href="/economy/pincodes?state=ON" class="btn btn-sm <%= filters.state === 'ON' ? 'btn-primary' : 'btn-secondary' %>">Activos (ON)</a>
+                            <a href="/economy/pincodes?state=OFF" class="btn btn-sm <%= filters.state === 'OFF' ? 'btn-primary' : 'btn-secondary' %>">Canjeados (OFF)</a>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Código PIN</th>
+                                <th>Monto Cash</th>
+                                <th>Vendedor</th>
+                                <th>Estado</th>
+                                <th>Canjeado Por</th>
+                                <th>Fecha Canje</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (pins && pins.length > 0) { %>
+                                <% pins.forEach(p => { %>
+                                    <tr>
+                                        <td>#<%= p.id %></td>
+                                        <td>
+                                            <code style="background: #090d16; padding: 4px 8px; border-radius: 4px; color: #60a5fa; font-weight: 700;">
+                                                <%= p.pin %>
+                                            </code>
+                                        </td>
+                                        <td style="color: #34d399; font-weight: 700;"><%= formatNumber(p.rode) %> Cash</td>
+                                        <td><%= p.seller %></td>
+                                        <td>
+                                            <% if (p.state === 'ON') { %>
+                                                <span class="status-pill online">Activo (ON)</span>
+                                            <% } else { %>
+                                                <span class="status-pill offline">Canjeado (OFF)</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= p.used_by_username || (p.used_by ? 'ID #' + p.used_by : '—') %></td>
+                                        <td>
+                                            <%= p.date_time ? new Date(p.date_time * 1000).toLocaleString('es-ES') : '—' %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <form action="/economy/pincodes/<%= p.id %>/delete" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('¿Eliminar este código PIN?');">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No hay códigos PIN registrados.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+
+                    <% if (pagination.totalPages > 1) { %>
+                        <div class="pagination-container">
+                            <span>Mostrando <%= pins.length %> de <%= pagination.total %> códigos</span>
+                            <div class="pagination-links">
+                                <% for (let i = 1; i <= Math.min(pagination.totalPages, 10); i++) { %>
+                                    <a href="/economy/pincodes?page=<%= i %><%= filters.state ? '&state=' + filters.state : '' %>" class="page-btn <%= pagination.page === i ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

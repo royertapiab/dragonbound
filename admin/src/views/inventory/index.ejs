@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Action Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 style="font-size: 18px; font-weight: 800; color: #fff;">Catálogo Maestro de Avatares (<%= pagination.total.toLocaleString() %> disponibles)</h2>
+                        <p style="font-size: 13px; color: var(--text-dim);">Explora y asigna cualquier avatar oficial del juego.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-primary" onclick="openGrantModal()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Entregar Avatar a Jugador
+                        </button>
+
+                        <button type="button" class="btn btn-success" onclick="openMassGrantModal()">
+                            Regalo Masivo (Evento)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <form action="/inventory" method="GET" style="display: flex; gap: 12px; flex-wrap: wrap; width: 100%; align-items: center;">
+                        <input 
+                            type="text" 
+                            name="query" 
+                            class="form-control" 
+                            placeholder="Buscar por ID, nombre o archivo (ej. Blue Wings, mh00000)..." 
+                            value="<%= filters.query || '' %>"
+                            style="max-width: 360px;"
+                        >
+
+                        <select name="type" class="form-control" style="max-width: 200px;">
+                            <option value="">Todas las Categorías</option>
+                            <% Object.keys(avatarTypes).forEach(t => { %>
+                                <option value="<%= t %>" <%= filters.type === t ? 'selected' : '' %>><%= avatarTypes[t] %></option>
+                            <% }); %>
+                        </select>
+
+                        <select name="gender" class="form-control" style="max-width: 150px;">
+                            <option value="">Cualquier Género</option>
+                            <% Object.keys(genders).forEach(g => { %>
+                                <option value="<%= g %>" <%= filters.gender === g ? 'selected' : '' %>><%= genders[g] %></option>
+                            <% }); %>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+
+                        <% if (filters.query || filters.type || filters.gender) { %>
+                            <a href="/inventory" class="btn btn-secondary">Limpiar</a>
+                        <% } %>
+                    </form>
+                </div>
+
+                <!-- Avatar Catalog Cards Grid -->
+                <div class="avatar-grid">
+                    <% if (items && items.length > 0) { %>
+                        <% items.forEach(item => { %>
+                            <div class="avatar-card">
+                                <div class="avatar-icon-box">
+                                    <% if (item.type === 0) { %>🧢<% } else if (item.type === 1) { %>👕<% } else if (item.type === 2) { %>👓<% } else if (item.type === 3) { %>🚩<% } else if (item.type === 4) { %>🖼️<% } else if (item.type === 5) { %>✨<% } else { %>💎<% } %>
+                                </div>
+                                <div class="avatar-card-title" title="<%= item.name %>">
+                                    <%= item.name %>
+                                </div>
+                                <div class="avatar-card-meta">
+                                    ID: <strong>#<%= item.id %></strong> &bull; <%= getAvatarTypeName(item.type) %>
+                                </div>
+
+                                <div style="display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center;">
+                                    <span class="role-badge MODERATOR" style="font-size: 10px;">
+                                        <%= getGenderName(item.gender) %>
+                                    </span>
+                                    <% if (item.stats.cash_perm > 0) { %>
+                                        <span class="role-badge GM" style="font-size: 10px;">
+                                            <%= formatNumber(item.stats.cash_perm) %> Cash
+                                        </span>
+                                    <% } %>
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-primary" style="width: 100%; margin-top: auto;" onclick="openGrantModal('<%= item.id %>', '<%= item.name.replace(/'/g, '\\\'') %>')">
+                                    Entregar
+                                </button>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); padding: 40px; background: var(--bg-card); border-radius: 12px;">
+                            No se encontraron avatares en el catálogo con los filtros seleccionados.
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Pagination -->
+                <% if (pagination.totalPages > 1) { %>
+                    <div class="pagination-container" style="background: var(--bg-card); border-radius: 12px; margin-bottom: 24px;">
+                        <span>Mostrando página <%= pagination.page %> de <%= pagination.totalPages %> (<%= pagination.total.toLocaleString() %> avatares)</span>
+                        <div class="pagination-links">
+                            <% if (pagination.page > 1) { %>
+                                <a href="/inventory?page=1<%= filters.query ? '&query=' + encodeURIComponent(filters.query) : '' %><%= filters.type ? '&type=' + filters.type : '' %><%= filters.gender ? '&gender=' + filters.gender : '' %>" class="page-btn">&laquo; Primero</a>
+                                <a href="/inventory?page=<%= pagination.page - 1 %><%= filters.query ? '&query=' + encodeURIComponent(filters.query) : '' %><%= filters.type ? '&type=' + filters.type : '' %><%= filters.gender ? '&gender=' + filters.gender : '' %>" class="page-btn">Anterior</a>
+                            <% } %>
+
+                            <span class="page-btn active"><%= pagination.page %></span>
+
+                            <% if (pagination.page < pagination.totalPages) { %>
+                                <a href="/inventory?page=<%= pagination.page + 1 %><%= filters.query ? '&query=' + encodeURIComponent(filters.query) : '' %><%= filters.type ? '&type=' + filters.type : '' %><%= filters.gender ? '&gender=' + filters.gender : '' %>" class="page-btn">Siguiente</a>
+                                <a href="/inventory?page=<%= pagination.totalPages %><%= filters.query ? '&query=' + encodeURIComponent(filters.query) : '' %><%= filters.type ? '&type=' + filters.type : '' %><%= filters.gender ? '&gender=' + filters.gender : '' %>" class="page-btn">Último &raquo;</a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Grant Single Avatar Modal -->
+                <div id="grant-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 12px; max-width: 480px; width: 90%; margin: 80px auto; padding: 28px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: #60a5fa; margin-bottom: 16px;">
+                            Entregar Avatar a Jugador
+                        </h3>
+
+                        <form action="/inventory/grant" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Jugador Destinatario (ID, Nickname o Username)</label>
+                                <input type="text" name="userId" class="form-control" placeholder="Ej. Destroyer o 593" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Avatar ID</label>
+                                <input type="number" id="grant-aid" name="aId" class="form-control" placeholder="Ej. 3691" required>
+                                <span id="grant-avatar-label" style="font-size: 12px; color: #34d399; margin-top: 4px; display: block;"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Duración / Vencimiento</label>
+                                <select name="expireDays" class="form-control">
+                                    <option value="0" selected>Permanente (Sin límite)</option>
+                                    <option value="7">7 Días</option>
+                                    <option value="30">30 Días</option>
+                                    <option value="90">90 Días</option>
+                                    <option value="365">1 Año</option>
+                                </select>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Flag de Cash</label>
+                                    <select name="isCash" class="form-control">
+                                        <option value="1" selected>Sí (Item Cash)</option>
+                                        <option value="0">No (Item Gold)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Flag de Regalo</label>
+                                    <select name="isGift" class="form-control">
+                                        <option value="1" selected>Sí (Es Regalo)</option>
+                                        <option value="0">No (Comprado)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button type="submit" class="btn btn-primary" style="flex: 1;">Entregar Avatar</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeGrantModal()">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Mass Grant Modal -->
+                <div id="mass-grant-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 12px; max-width: 480px; width: 90%; margin: 80px auto; padding: 28px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: #34d399; margin-bottom: 16px;">
+                            Regalo Masivo de Avatar (Evento)
+                        </h3>
+
+                        <form action="/inventory/mass-grant" method="POST" onsubmit="return confirm('¿Confirmar entrega masiva del avatar a todos los usuarios seleccionados?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Destinatarios</label>
+                                <select name="target" class="form-control">
+                                    <option value="online" selected>Solo Jugadores ONLINE</option>
+                                    <option value="all">TODOS los Jugadores Registrados</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Avatar ID a Entregar</label>
+                                <input type="number" name="aId" class="form-control" placeholder="Ej. 3691" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Duración</label>
+                                <select name="expireDays" class="form-control">
+                                    <option value="0" selected>Permanente (Sin límite)</option>
+                                    <option value="7">7 Días</option>
+                                    <option value="30">30 Días</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button type="submit" class="btn btn-success" style="flex: 1;">Iniciar Entrega Masiva</button>
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('mass-grant-modal').style.display='none'">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+
+    <script>
+        function openGrantModal(id, name) {
+            document.getElementById('grant-modal').style.display = 'block';
+            if (id) {
+                document.getElementById('grant-aid').value = id;
+                document.getElementById('grant-avatar-label').textContent = name ? 'Seleccionado: ' + name : '';
+            } else {
+                document.getElementById('grant-aid').value = '';
+                document.getElementById('grant-avatar-label').textContent = '';
+            }
+        }
+        function closeGrantModal() {
+            document.getElementById('grant-modal').style.display = 'none';
+        }
+        function openMassGrantModal() {
+            document.getElementById('mass-grant-modal').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

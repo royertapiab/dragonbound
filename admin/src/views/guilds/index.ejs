@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <form action="/guilds" method="GET" style="display: flex; gap: 12px; flex-wrap: wrap; width: 100%; align-items: center;">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Buscar gremio por nombre..." 
+                            value="<%= filters.search || '' %>"
+                            style="max-width: 360px;"
+                        >
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                        <% if (filters.search) { %>
+                            <a href="/guilds" class="btn btn-secondary">Limpiar</a>
+                        <% } %>
+                    </form>
+                </div>
+
+                <!-- Guilds Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Lista de Gremios / Clanes (<%= pagination.total.toLocaleString() %>)</h3>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre del Gremio</th>
+                                <th>Líder (Master)</th>
+                                <th>Puntos</th>
+                                <th>Miembros</th>
+                                <th>Rango Gremial</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (guilds && guilds.length > 0) { %>
+                                <% guilds.forEach(g => { %>
+                                    <tr>
+                                        <td><strong>#<%= g.Id %></strong></td>
+                                        <td>
+                                            <span style="font-weight: 700; color: #fff; font-size: 14px;"><%= g.Name %></span>
+                                        </td>
+                                        <td>
+                                            <% if (g.leader_user_id) { %>
+                                                <a href="/players/<%= g.leader_user_id %>" style="color: #60a5fa; text-decoration: none; font-weight: 600;">
+                                                    👑 <%= g.leader_name %>
+                                                </a>
+                                            <% } else { %>
+                                                <span style="color: var(--text-dim);">Sin líder asignado</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="color: var(--gold); font-weight: 700;"><%= formatNumber(g.points) %> pts</td>
+                                        <td>
+                                            <span class="role-badge MODERATOR" style="font-size: 11px;">
+                                                <%= g.member_count %> miembros
+                                            </span>
+                                        </td>
+                                        <td>Rank <%= g.rank %></td>
+                                        <td style="text-align: right;">
+                                            <a href="/guilds/<%= g.Id %>" class="btn btn-sm btn-secondary">
+                                                Administrar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No se encontraron gremios registrados.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+
+                    <% if (pagination.totalPages > 1) { %>
+                        <div class="pagination-container">
+                            <span>Mostrando <%= guilds.length %> de <%= pagination.total %> gremios</span>
+                            <div class="pagination-links">
+                                <% for (let i = 1; i <= Math.min(pagination.totalPages, 10); i++) { %>
+                                    <a href="/guilds?page=<%= i %><%= filters.search ? '&search=' + encodeURIComponent(filters.search) : '' %>" class="page-btn <%= pagination.page === i ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

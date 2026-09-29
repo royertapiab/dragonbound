@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Error' %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body class="login-body">
+    <div class="login-card" style="text-align: center;">
+        <div style="font-size: 64px; font-weight: 900; color: var(--danger); line-height: 1; margin-bottom: 16px;">
+            <%= typeof statusCode !== 'undefined' ? statusCode : '500' %>
+        </div>
+        <h1 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 12px;">
+            <%= typeof title !== 'undefined' ? title : 'Ocurrió un error' %>
+        </h1>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">
+            <%= typeof message !== 'undefined' ? message : 'La operación no se pudo completar.' %>
+        </p>
+
+        <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none; max-width: 200px;">
+            Volver al Panel
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <form action="/audit" method="GET" style="display: flex; gap: 12px; flex-wrap: wrap; width: 100%; align-items: center;">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Buscar por admin, jugador objetivo, IP..." 
+                            value="<%= filters.search || '' %>"
+                            style="max-width: 340px;"
+                        >
+
+                        <input 
+                            type="text" 
+                            name="action" 
+                            class="form-control" 
+                            placeholder="Filtrar por acción (ej. economy.add_cash, player.edit)..." 
+                            value="<%= filters.action || '' %>"
+                            style="max-width: 320px;"
+                        >
+
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                        <% if (filters.search || filters.action) { %>
+                            <a href="/audit" class="btn btn-secondary">Limpiar</a>
+                        <% } %>
+                    </form>
+                </div>
+
+                <!-- Audit Log Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Registros de Auditoría Administrativa (<%= pagination.total.toLocaleString() %>)</h3>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha & Hora</th>
+                                <th>Administrador</th>
+                                <th>Acción</th>
+                                <th>Objetivo</th>
+                                <th>Detalle / Cambios</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (logs && logs.length > 0) { %>
+                                <% logs.forEach(l => { %>
+                                    <tr>
+                                        <td>#<%= l.id %></td>
+                                        <td><span style="font-size: 12px;"><%= formatDate(l.created_at) %></span></td>
+                                        <td>
+                                            <span style="color: #60a5fa; font-weight: 700;"><%= l.admin_game_id %></span>
+                                        </td>
+                                        <td>
+                                            <span class="role-badge MODERATOR" style="font-size: 11px;">
+                                                <%= l.action %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <% if (l.target_game_id) { %>
+                                                <strong><%= l.target_game_id %></strong>
+                                                <span style="font-size: 10px; color: var(--text-dim);">(<%= l.target_type %>)</span>
+                                            <% } else { %>
+                                                <span style="color: var(--text-dim);"><%= l.target_type || '—' %></span>
+                                            <% } %>
+                                        </td>
+                                        <td style="max-width: 320px; font-size: 11.5px; word-break: break-all;">
+                                            <% if (l.new_value) { %>
+                                                <code style="background: #090d16; padding: 3px 6px; border-radius: 4px; color: #34d399;">
+                                                    <%= l.new_value %>
+                                                </code>
+                                            <% } else { %>
+                                                <span style="color: var(--text-dim);">—</span>
+                                            <% } %>
+                                        </td>
+                                        <td><code style="font-size: 11px;"><%= l.ip_address || '—' %></code></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No hay registros de auditoría que coincidan con la búsqueda.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+
+                    <% if (pagination.totalPages > 1) { %>
+                        <div class="pagination-container">
+                            <span>Mostrando <%= logs.length %> de <%= pagination.total %> registros</span>
+                            <div class="pagination-links">
+                                <% for (let i = 1; i <= Math.min(pagination.totalPages, 10); i++) { %>
+                                    <a href="/audit?page=<%= i %><%= filters.search ? '&search=' + encodeURIComponent(filters.search) : '' %><%= filters.action ? '&action=' + encodeURIComponent(filters.action) : '' %>" class="page-btn <%= pagination.page === i ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

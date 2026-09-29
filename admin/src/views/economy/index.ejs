@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Navigation Tabs -->
+                <div class="tabs-nav">
+                    <a href="/economy" class="tab-btn active">Resumen & Fondos</a>
+                    <a href="/economy/pincodes" class="tab-btn">Códigos PIN / Vouchers (<%= overview.pinStats.active_pins %>)</a>
+                </div>
+
+                <!-- Global Stats Cards -->
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon gold">💰</div>
+                        <div class="stat-content">
+                            <div class="stat-title">Oro Total Circulante</div>
+                            <div class="stat-value" style="color: var(--gold);"><%= formatNumber(overview.totals.total_gold) %></div>
+                            <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">
+                                Promedio: <%= formatNumber(Math.round(overview.totals.avg_gold)) %> por jugador
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">💵</div>
+                        <div class="stat-content">
+                            <div class="stat-title">Cash Total Circulante</div>
+                            <div class="stat-value" style="color: #34d399;"><%= formatNumber(overview.totals.total_cash) %></div>
+                            <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">
+                                Promedio: <%= formatNumber(Math.round(overview.totals.avg_cash)) %> por jugador
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon blue">⚡</div>
+                        <div class="stat-content">
+                            <div class="stat-title">GP Total Circulante</div>
+                            <div class="stat-value" style="color: #60a5fa;"><%= formatNumber(overview.totals.total_gp) %></div>
+                            <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">
+                                Promedio: <%= formatNumber(Math.round(overview.totals.avg_gp)) %> por jugador
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Tools -->
+                <div class="form-grid-2">
+                    <!-- Tool 1: Modify Specific Player Funds -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Modificar Saldo de Jugador
+                        </h3>
+
+                        <form action="/economy/modify" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Jugador (ID o Game ID o Username)</label>
+                                <input type="text" name="userId" class="form-control" placeholder="Ej. Destroyer o 593" required>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Moneda</label>
+                                    <select name="type" class="form-control">
+                                        <option value="gold">Oro (Gold)</option>
+                                        <option value="cash" selected>Cash</option>
+                                        <option value="gp">GP</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Operación</label>
+                                    <select name="operation" class="form-control">
+                                        <option value="add">Sumar (+)</option>
+                                        <option value="subtract">Restar (-)</option>
+                                        <option value="set">Fijar exactamente (=)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Monto</label>
+                                <input type="number" name="amount" class="form-control" placeholder="Ej. 100000" min="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Razón / Justificación</label>
+                                <input type="text" name="reason" class="form-control" placeholder="Ej. Recarga manual por soporte">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Ejecutar Transacción
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tool 2: Global Airdrop -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            Entrega Masiva / Airdrop Global
+                        </h3>
+
+                        <form action="/economy/airdrop" method="POST" onsubmit="return confirm('¿Confirmar entrega masiva de saldo a los jugadores seleccionados?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Destinatarios</label>
+                                <select name="target" class="form-control">
+                                    <option value="online">Solo Jugadores Actualmente ONLINE</option>
+                                    <option value="all">TODOS los Jugadores Registrados</option>
+                                </select>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Moneda a Entregar</label>
+                                    <select name="type" class="form-control">
+                                        <option value="cash" selected>Cash</option>
+                                        <option value="gold">Oro (Gold)</option>
+                                        <option value="gp">GP</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Monto por Jugador</label>
+                                    <input type="number" name="amount" class="form-control" placeholder="Ej. 5000" min="1" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Motivo del Evento</label>
+                                <input type="text" name="reason" class="form-control" placeholder="Ej. Evento fin de semana, compensación por mantenimiento">
+                            </div>
+
+                            <button type="submit" class="btn btn-success" style="width: 100%;">
+                                Iniciar Airdrop Masivo
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Top Rankings Tables -->
+                <div class="form-grid-2">
+                    <!-- Top Richest Gold -->
+                    <div class="card-table">
+                        <div class="table-header">
+                            <h3 style="font-size: 14px; font-weight: 700; color: var(--gold);">Top 10 Más Ricos en Oro</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Game ID</th>
+                                    <th style="text-align: right;">Oro Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% overview.topGold.forEach((u, i) => { %>
+                                    <tr>
+                                        <td><strong>#<%= i + 1 %></strong></td>
+                                        <td>
+                                            <a href="/players/<%= u.Id %>" style="color: #60a5fa; text-decoration: none; font-weight: 600;">
+                                                <%= u.game_id %>
+                                            </a>
+                                        </td>
+                                        <td style="text-align: right; color: var(--gold); font-weight: 700;">
+                                            <%= formatNumber(u.gold) %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Top Richest Cash -->
+                    <div class="card-table">
+                        <div class="table-header">
+                            <h3 style="font-size: 14px; font-weight: 700; color: #34d399;">Top 10 Más Ricos en Cash</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Game ID</th>
+                                    <th style="text-align: right;">Cash Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% overview.topCash.forEach((u, i) => { %>
+                                    <tr>
+                                        <td><strong>#<%= i + 1 %></strong></td>
+                                        <td>
+                                            <a href="/players/<%= u.Id %>" style="color: #60a5fa; text-decoration: none; font-weight: 600;">
+                                                <%= u.game_id %>
+                                            </a>
+                                        </td>
+                                        <td style="text-align: right; color: #34d399; font-weight: 700;">
+                                            <%= formatNumber(u.cash) %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

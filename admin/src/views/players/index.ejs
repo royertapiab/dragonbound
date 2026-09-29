@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Filter & Search Bar -->
+                <div class="filter-bar">
+                    <form action="/players" method="GET" style="display: flex; gap: 12px; flex-wrap: wrap; width: 100%; align-items: center;">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Buscar por ID, Game ID, Username o IP..." 
+                            value="<%= filters.search || '' %>"
+                            style="max-width: 320px;"
+                        >
+
+                        <select name="rank" class="form-control" style="max-width: 180px;">
+                            <option value="">Todos los Rangos</option>
+                            <% Object.keys(ranks).forEach(r => { %>
+                                <option value="<%= r %>" <%= filters.rank === r ? 'selected' : '' %>><%= ranks[r].name %></option>
+                            <% }); %>
+                        </select>
+
+                        <select name="gm" class="form-control" style="max-width: 140px;">
+                            <option value="">Staff GM</option>
+                            <option value="1" <%= filters.gm === '1' ? 'selected' : '' %>>Solo GM (Sí)</option>
+                            <option value="0" <%= filters.gm === '0' ? 'selected' : '' %>>Jugadores Normales</option>
+                        </select>
+
+                        <select name="banned" class="form-control" style="max-width: 150px;">
+                            <option value="">Estado Baneo</option>
+                            <option value="1" <%= filters.banned === '1' ? 'selected' : '' %>>Baneados</option>
+                            <option value="0" <%= filters.banned === '0' ? 'selected' : '' %>>Sin Sanción</option>
+                        </select>
+
+                        <select name="isOnline" class="form-control" style="max-width: 140px;">
+                            <option value="">Conexión</option>
+                            <option value="1" <%= filters.isOnline === '1' ? 'selected' : '' %>>Online</option>
+                            <option value="0" <%= filters.isOnline === '0' ? 'selected' : '' %>>Offline</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            Filtrar
+                        </button>
+
+                        <% if (filters.search || filters.rank || filters.gm || filters.banned || filters.isOnline) { %>
+                            <a href="/players" class="btn btn-secondary">Limpiar</a>
+                        <% } %>
+                    </form>
+                </div>
+
+                <!-- Players Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Lista de Jugadores (<%= pagination.total.toLocaleString() %> totales)</h3>
+                        <span style="font-size: 12px; color: var(--text-dim);">Página <%= pagination.page %> de <%= pagination.totalPages %></span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Game ID</th>
+                                <th>Usuario / Login</th>
+                                <th>Rango</th>
+                                <th>Oro</th>
+                                <th>Cash</th>
+                                <th>GP</th>
+                                <th>GM</th>
+                                <th>Estado</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (players && players.length > 0) { %>
+                                <% players.forEach(p => { %>
+                                    <tr>
+                                        <td><strong>#<%= p.Id %></strong></td>
+                                        <td>
+                                            <span style="color: #60a5fa; font-weight: 600;"><%= p.game_id %></span>
+                                            <% if (p.country) { %>
+                                                <span style="font-size: 10px; color: var(--text-dim); margin-left: 4px;">[<%= p.country %>]</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= p.Username %></td>
+                                        <td>
+                                            <% const rInfo = ranks[p.rank] || { name: `Rank ${p.rank}` }; %>
+                                            <span class="role-badge <%= p.rank === 26 || p.rank === 31 ? 'GM' : 'MODERATOR' %>" style="font-size: 11px;">
+                                                <%= rInfo.name %>
+                                            </span>
+                                        </td>
+                                        <td style="color: var(--gold); font-weight: 600;"><%= Number(p.gold).toLocaleString() %></td>
+                                        <td style="color: #34d399; font-weight: 600;"><%= Number(p.cash).toLocaleString() %></td>
+                                        <td style="color: #38bdf8;"><%= Number(p.gp).toLocaleString() %></td>
+                                        <td>
+                                            <% if (p.gm === 1) { %>
+                                                <span style="color: var(--success); font-weight: 700;">GM</span>
+                                            <% } else { %>
+                                                <span style="color: var(--text-dim);">No</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (p.banned === 1) { %>
+                                                <span class="status-pill offline" style="color: #f87171; border-color: #ef4444;">Baneado</span>
+                                            <% } else if (p.IsOnline === 1) { %>
+                                                <span class="status-pill online">
+                                                    <span class="status-dot"></span> Online
+                                                </span>
+                                            <% } else { %>
+                                                <span class="status-pill offline">Offline</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="/players/<%= p.Id %>" class="btn btn-sm btn-secondary">
+                                                Ver Perfil
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="10" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No se encontraron jugadores que coincidan con la búsqueda.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination -->
+                    <% if (pagination.totalPages > 1) { %>
+                        <div class="pagination-container">
+                            <span>Mostrando <%= players.length %> de <%= pagination.total.toLocaleString() %> jugadores</span>
+                            <div class="pagination-links">
+                                <% if (pagination.page > 1) { %>
+                                    <a href="/players?page=1<%= filters.search ? '&search=' + encodeURIComponent(filters.search) : '' %><%= filters.rank ? '&rank=' + filters.rank : '' %><%= filters.gm ? '&gm=' + filters.gm : '' %><%= filters.banned ? '&banned=' + filters.banned : '' %><%= filters.isOnline ? '&isOnline=' + filters.isOnline : '' %>" class="page-btn">&laquo; Primero</a>
+                                    <a href="/players?page=<%= pagination.page - 1 %><%= filters.search ? '&search=' + encodeURIComponent(filters.search) : '' %><%= filters.rank ? '&rank=' + filters.rank : '' %><%= filters.gm ? '&gm=' + filters.gm : '' %><%= filters.banned ? '&banned=' + filters.banned : '' %><%= filters.isOnline ? '&isOnline=' + filters.isOnline : '' %>" class="page-btn">Anterior</a>
+                                <% } %>
+
+                                <span class="page-btn active"><%= pagination.page %></span>
+
+                                <% if (pagination.page < pagination.totalPages) { %>
+                                    <a href="/players?page=<%= pagination.page + 1 %><%= filters.search ? '&search=' + encodeURIComponent(filters.search) : '' %><%= filters.rank ? '&rank=' + filters.rank : '' %><%= filters.gm ? '&gm=' + filters.gm : '' %><%= filters.banned ? '&banned=' + filters.banned : '' %><%= filters.isOnline ? '&isOnline=' + filters.isOnline : '' %>" class="page-btn">Siguiente</a>
+                                    <a href="/players?page=<%= pagination.totalPages %><%= filters.search ? '&search=' + encodeURIComponent(filters.search) : '' %><%= filters.rank ? '&rank=' + filters.rank : '' %><%= filters.gm ? '&gm=' + filters.gm : '' %><%= filters.banned ? '&banned=' + filters.banned : '' %><%= filters.isOnline ? '&isOnline=' + filters.isOnline : '' %>" class="page-btn">Último &raquo;</a>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

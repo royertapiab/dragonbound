@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Guild Header Banner -->
+                <div class="banner-info" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <a href="/guilds" class="btn btn-sm btn-secondary" style="margin-right: 6px;">
+                                &larr; Volver a Gremios
+                            </a>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #fff;"><%= guild.Name %></h2>
+                            <span class="role-badge GM">Rank <%= guild.rank %></span>
+                            <span class="role-badge MODERATOR"><%= guild.members.length %> Miembros</span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-dim); margin-top: 6px;">
+                            ID: <strong>#<%= guild.Id %></strong> &bull; 
+                            Puntos: <strong style="color: var(--gold);"><%= formatNumber(guild.points) %></strong>
+                        </div>
+                    </div>
+
+                    <div>
+                        <form action="/guilds/<%= guild.Id %>/delete" method="POST" style="margin: 0;" onsubmit="return confirm('¿Disolver y eliminar definitivamente este gremio? Esta acción expulsará a todos sus miembros y no se puede deshacer.');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Disolver Gremio
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Guild Settings Form -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        </svg>
+                        Editar Información del Gremio
+                    </h3>
+
+                    <form action="/guilds/<%= guild.Id %>/edit" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label class="form-label">Nombre del Gremio</label>
+                                <input type="text" name="name" class="form-control" value="<%= guild.Name %>" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Puntos Acumulados</label>
+                                <input type="number" name="points" class="form-control" value="<%= guild.points %>" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Rango Gremial</label>
+                                <input type="number" name="rank" class="form-control" value="<%= guild.rank %>" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">URL del Logo / Emblema</label>
+                                <input type="text" name="img" class="form-control" value="<%= guild.img %>">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">URL del Fondo del Clan</label>
+                                <input type="text" name="fondo" class="form-control" value="<%= guild.fondo %>">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Descripción / Mensaje de Bienvenida</label>
+                            <textarea name="about" class="form-control" rows="3"><%= guild.about %></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Sitio Web / Enlace de Comunidad</label>
+                            <input type="text" name="website" class="form-control" value="<%= guild.website %>">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            Guardar Cambios del Gremio
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Guild Members Roster Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Miembros del Gremio (<%= guild.members.length %>)</h3>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rol en Clan</th>
+                                <th>Jugador</th>
+                                <th>Usuario</th>
+                                <th>Rango</th>
+                                <th>Puntos GP</th>
+                                <th>Estado</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (guild.members && guild.members.length > 0) { %>
+                                <% guild.members.forEach(m => { %>
+                                    <tr>
+                                        <td>
+                                            <% if (m.Job === 1) { %>
+                                                <span class="role-badge OWNER" style="font-size: 11px;">👑 LÍDER (MASTER)</span>
+                                            <% } else if (m.Job === 2) { %>
+                                                <span class="role-badge GM" style="font-size: 11px;">⭐ SUB-LÍDER</span>
+                                            <% } else { %>
+                                                <span class="role-badge MODERATOR" style="font-size: 11px;">MIEMBRO</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <a href="/players/<%= m.user_id %>" style="color: #60a5fa; font-weight: 700; text-decoration: none;">
+                                                <%= m.game_id %>
+                                            </a>
+                                        </td>
+                                        <td><%= m.Username %></td>
+                                        <td>
+                                            <% const rInfo = getRankInfo(m.rank); %>
+                                            <span style="font-size: 12px;"><%= rInfo.name %></span>
+                                        </td>
+                                        <td style="color: #38bdf8; font-weight: 600;"><%= formatNumber(m.gp) %> GP</td>
+                                        <td>
+                                            <% if (m.IsOnline === 1) { %>
+                                                <span class="status-pill online">Online</span>
+                                            <% } else { %>
+                                                <span class="status-pill offline">Offline</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <div style="display: inline-flex; gap: 6px;">
+                                                <% if (m.Job !== 1) { %>
+                                                    <form action="/guilds/<%= guild.Id %>/transfer" method="POST" style="margin: 0;" onsubmit="return confirm('¿Transferir el liderazgo del clan a <%= m.game_id %>?');">
+                                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                        <input type="hidden" name="newMasterUserId" value="<%= m.user_id %>">
+                                                        <button type="submit" class="btn btn-sm btn-warning" title="Hacer líder">
+                                                            Hacer Líder
+                                                        </button>
+                                                    </form>
+                                                <% } %>
+
+                                                <form action="/guilds/<%= guild.Id %>/members/<%= m.user_id %>/remove" method="POST" style="margin: 0;" onsubmit="return confirm('¿Expulsar a <%= m.game_id %> del clan?');">
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Expulsar del clan">
+                                                        Expulsar
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No hay miembros registrados en este gremio.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

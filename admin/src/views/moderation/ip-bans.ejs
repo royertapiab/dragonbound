@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Navigation Tabs -->
+                <div class="tabs-nav">
+                    <a href="/moderation" class="tab-btn">Cuentas Sancionadas</a>
+                    <a href="/moderation/ip-bans" class="tab-btn active">Bloqueo de IPs</a>
+                    <a href="/moderation/sessions" class="tab-btn">Sesiones Online (Kick)</a>
+                </div>
+
+                <!-- Add IP Ban Form -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        </svg>
+                        Bloquear Dirección IP
+                    </h3>
+
+                    <form action="/moderation/ip-bans" method="POST" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <div style="flex: 1; min-width: 200px;">
+                            <label class="form-label">Dirección IP (IPv4)</label>
+                            <input type="text" name="ip" class="form-control" placeholder="Ej. 190.42.88.35" required>
+                        </div>
+
+                        <div style="flex: 2; min-width: 280px;">
+                            <label class="form-label">Razón del Bloqueo</label>
+                            <input type="text" name="reason" class="form-control" placeholder="Ej. Ataques continuos, multicuenta abusiva..." required>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">
+                            Bloquear IP
+                        </button>
+                    </form>
+                </div>
+
+                <!-- IP Bans Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Direcciones IP Bloqueadas (<%= pagination.total.toLocaleString() %>)</h3>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Dirección IP</th>
+                                <th>Razón</th>
+                                <th>GM que Bloqueó</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (ipBans && ipBans.length > 0) { %>
+                                <% ipBans.forEach(ip => { %>
+                                    <tr>
+                                        <td>#<%= ip.Id %></td>
+                                        <td>
+                                            <code style="background: #090d16; padding: 4px 8px; border-radius: 4px; color: #f87171; font-weight: 700;">
+                                                <%= ip.ip %>
+                                            </code>
+                                        </td>
+                                        <td><%= ip.razon %></td>
+                                        <td><%= ip.gm %> (ID: <%= ip.IdGM %>)</td>
+                                        <td style="text-align: right;">
+                                            <form action="/moderation/ip-bans/<%= ip.Id %>/delete" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('¿Desbloquear esta dirección IP?');">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="btn btn-sm btn-secondary">
+                                                    Desbloquear
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: var(--text-dim); padding: 30px;">
+                                        No hay direcciones IP bloqueadas.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+
+                    <% if (pagination.totalPages > 1) { %>
+                        <div class="pagination-container">
+                            <span>Mostrando <%= ipBans.length %> de <%= pagination.total %> IPs bloqueadas</span>
+                            <div class="pagination-links">
+                                <% for (let i = 1; i <= Math.min(pagination.totalPages, 10); i++) { %>
+                                    <a href="/moderation/ip-bans?page=<%= i %>" class="page-btn <%= pagination.page === i ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

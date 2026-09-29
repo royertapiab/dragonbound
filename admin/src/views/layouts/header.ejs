@@ -1,0 +1,39 @@
+<header class="top-header">
+    <div class="header-left">
+        <h1 class="header-page-title"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Dashboard' %></h1>
+    </div>
+
+    <div class="header-right">
+        <div style="font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="live-clock">--:--:-- UTC</span>
+        </div>
+
+        <% if (typeof admin !== 'undefined' && admin) { %>
+            <div class="user-profile">
+                <div class="avatar-circle">
+                    <%= admin.gameId ? admin.gameId.substring(0, 2).toUpperCase() : 'DB' %>
+                </div>
+                <div class="user-meta">
+                    <span class="user-name"><%= admin.gameId %></span>
+                    <span class="role-badge <%= admin.roleName %>"><%= admin.roleName %></span>
+                </div>
+            </div>
+
+            <form action="/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <button type="submit" class="btn-logout" title="Cerrar sesión">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Salir</span>
+                </button>
+            </form>
+        <% } %>
+    </div>
+</header>

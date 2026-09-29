@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <!-- Header Bar -->
+            <%- include('../layouts/header') %>
+
+            <!-- Page Content -->
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Welcome Status Banner -->
+                <div class="banner-info">
+                    <div class="banner-content">
+                        <h3>Panel Administrativo Oficial &bull; Consola Completa</h3>
+                        <p>Gestión integral de jugadores, economía, inventario, moderación, servidores y gremios. Conectado como <strong><%= admin.gameId %></strong> (<%= admin.roleName %>).</p>
+                    </div>
+                    <div>
+                        <span class="role-badge <%= admin.roleName %>" style="font-size: 12px; padding: 4px 12px;">
+                            <%= admin.roleName %> &bull; <%= admin.permissions ? admin.permissions.length : 0 %> PERMISOS
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Game Statistics Summary Cards -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 20V10"></path>
+                            <path d="M12 20V4"></path>
+                            <path d="M6 20v-6"></path>
+                        </svg>
+                        Métricas Globales del Juego
+                    </h2>
+                </div>
+
+                <div class="stats-grid">
+                    <!-- Total Accounts -->
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Cuentas Registradas</div>
+                            <div class="stat-value" id="stat-accounts"><%= gameMetrics.totalAccounts.toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <!-- Online Accounts -->
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 14 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Jugadores Online</div>
+                            <div class="stat-value" id="stat-online"><%= gameMetrics.onlineAccounts %></div>
+                        </div>
+                    </div>
+
+                    <!-- Total Games -->
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Partidas Jugadas</div>
+                            <div class="stat-value"><%= gameMetrics.totalGames.toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <!-- Total Guilds -->
+                    <div class="stat-card">
+                        <div class="stat-icon gold">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Gremios Activos</div>
+                            <div class="stat-value"><%= gameMetrics.totalGuilds.toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <!-- Total Banned -->
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Cuentas Baneadas</div>
+                            <div class="stat-value"><%= gameMetrics.totalBanned %></div>
+                        </div>
+                    </div>
+
+                    <!-- Economy: Gold -->
+                    <div class="stat-card">
+                        <div class="stat-icon gold">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="8"></circle>
+                                <line x1="12" y1="2" x2="12" y2="4"></line>
+                                <line x1="12" y1="20" x2="12" y2="22"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Oro en Economía</div>
+                            <div class="stat-value"><%= gameMetrics.totalGold.toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <!-- Economy: Cash -->
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                <circle cx="12" cy="12" r="2"></circle>
+                                <path d="M6 12h.01M18 12h.01"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">Cash en Economía</div>
+                            <div class="stat-value"><%= gameMetrics.totalCash.toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <!-- Economy: GP -->
+                    <div class="stat-card">
+                        <div class="stat-icon cyan">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                <path d="M4 22h16"></path>
+                                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-title">GP Total Circulante</div>
+                            <div class="stat-value"><%= gameMetrics.totalGp.toLocaleString() %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Status Grid -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Estado de Servicios y Demonios
+                    </h2>
+                </div>
+
+                <div class="services-grid">
+                    <!-- Game Server -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.gameServer.name %></span>
+                            <span class="status-pill <%= services.gameServer.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.gameServer.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Puerto TCP: <%= services.gameServer.port %> (WebSocket)
+                        </div>
+                    </div>
+
+                    <!-- Web Server -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.webServer.name %></span>
+                            <span class="status-pill <%= services.webServer.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.webServer.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Puerto TCP: <%= services.webServer.port %> (HTTP)
+                        </div>
+                    </div>
+
+                    <!-- Scheduler -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.scheduler.name %></span>
+                            <span class="status-pill <%= services.scheduler.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.scheduler.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Procesos PID: <%= services.scheduler.pids.join(', ') || 'N/A' %>
+                        </div>
+                    </div>
+
+                    <!-- MariaDB -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.database.name %></span>
+                            <span class="status-pill <%= services.database.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.database.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Puerto TCP: <%= services.database.port %> (SQL)
+                        </div>
+                    </div>
+
+                    <!-- Nginx -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name"><%= services.nginx.name %></span>
+                            <span class="status-pill <%= services.nginx.status %>">
+                                <span class="status-dot"></span>
+                                <%= services.nginx.status %>
+                            </span>
+                        </div>
+                        <div class="service-meta">
+                            Proxy HTTPS: 443 / HTTP: 80
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Host & Resource Monitor -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        </svg>
+                        Monitoreo del Servidor Anfitrión
+                    </h2>
+                </div>
+
+                <div class="system-grid">
+                    <!-- CPU Monitor -->
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Carga de CPU (Load Avg)</span>
+                            <span class="monitor-value"><%= system.loadAverage[0] %></span>
+                        </div>
+                        <div class="monitor-footer" style="margin-top: 10px;">
+                            <span>1m: <%= system.loadAverage[0] %> &bull; 5m: <%= system.loadAverage[1] %> &bull; 15m: <%= system.loadAverage[2] %></span>
+                            <span><%= system.cpuCount %> Core(s)</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">
+                            <%= system.cpuModel %>
+                        </div>
+                    </div>
+
+                    <!-- RAM Monitor -->
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Memoria RAM</span>
+                            <span class="monitor-value"><%= system.ram.percent %>%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar <%= system.ram.percent > 85 ? 'gold' : 'blue' %>" style="width: <%= system.ram.percent %>%;"></div>
+                        </div>
+                        <div class="monitor-footer">
+                            <span>Usado: <%= system.ram.usedGb %> GB</span>
+                            <span>Total: <%= system.ram.totalGb %> GB (Libre: <%= system.ram.freeGb %> GB)</span>
+                        </div>
+                    </div>
+
+                    <!-- Disk Monitor -->
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Disco Raíz (/)</span>
+                            <span class="monitor-value"><%= system.disk.percent %>%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar <%= system.disk.percent > 85 ? 'gold' : 'green' %>" style="width: <%= system.disk.percent %>%;"></div>
+                        </div>
+                        <div class="monitor-footer">
+                            <span>Usado: <%= system.disk.usedGb %> GB</span>
+                            <span>Total: <%= system.disk.totalGb %> GB (Libre: <%= system.disk.freeGb %> GB)</span>
+                        </div>
+                    </div>
+
+                    <!-- Host & Uptime -->
+                    <div class="monitor-card">
+                        <div class="monitor-header">
+                            <span class="monitor-title">Tiempo de Actividad (Uptime)</span>
+                            <span class="monitor-value"><%= system.uptime %></span>
+                        </div>
+                        <div class="monitor-footer" style="margin-top: 10px;">
+                            <span>Host: <%= system.hostname %></span>
+                            <span>OS: <%= system.platform %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Registered Players Table -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Últimas Cuentas Registradas</h3>
+                        <span style="font-size: 12px; color: var(--text-dim);">Datos en vivo desde MariaDB</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Usuario</th>
+                                <th>Game ID</th>
+                                <th>Username (Login)</th>
+                                <th>Rango Visual</th>
+                                <th>GM Flag</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (gameMetrics.recentUsers && gameMetrics.recentUsers.length > 0) { %>
+                                <% gameMetrics.recentUsers.forEach(u => { %>
+                                    <tr>
+                                        <td><strong>#<%= u.Id %></strong></td>
+                                        <td><span style="color: #60a5fa; font-weight: 600;"><%= u.game_id %></span></td>
+                                        <td><%= u.Username %></td>
+                                        <td>
+                                            <% if (u.rank === 26) { %>
+                                                <span class="role-badge GM">GM (26)</span>
+                                            <% } else if (u.rank === 31) { %>
+                                                <span class="role-badge" style="background: #9333ea; color: #fff;">VIP (31)</span>
+                                            <% } else { %>
+                                                Rank <%= u.rank %>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (u.gm === 1) { %>
+                                                <span style="color: var(--success); font-weight: 700;">SÍ</span>
+                                            <% } else { %>
+                                                <span style="color: var(--text-dim);">NO</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (u.IsOnline === 1) { %>
+                                                <span class="status-pill online" style="display: inline-flex; padding: 2px 8px;">
+                                                    <span class="status-dot"></span> Online
+                                                </span>
+                                            <% } else { %>
+                                                <span class="status-pill offline" style="display: inline-flex; padding: 2px 8px;">
+                                                    <span class="status-dot"></span> Offline
+                                                </span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--text-dim);">No se encontraron usuarios recientes.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

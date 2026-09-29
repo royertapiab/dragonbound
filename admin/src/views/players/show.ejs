@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> — DragonBound Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../layouts/sidebar') %>
+
+        <div class="main-content">
+            <%- include('../layouts/header') %>
+
+            <main class="page-container">
+                <%- include('../layouts/alerts') %>
+
+                <!-- Player Header Banner -->
+                <div class="banner-info" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="avatar-circle" style="width: 56px; height: 56px; font-size: 22px;">
+                            <%= player.game_id ? player.game_id.substring(0, 2).toUpperCase() : 'DB' %>
+                        </div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h2 style="font-size: 20px; font-weight: 800; color: #fff;"><%= player.game_id %></h2>
+                                <span class="role-badge <%= player.rank === 26 || player.rank === 31 ? 'GM' : 'MODERATOR' %>">
+                                    <%= rankInfo.name %>
+                                </span>
+                                <% if (player.gm === 1) { %>
+                                    <span class="role-badge OWNER">STAFF GM</span>
+                                <% } %>
+                                <% if (player.banned === 1) { %>
+                                    <span class="role-badge" style="background: #ef4444; color: #fff;">BANEADO</span>
+                                <% } %>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-dim); margin-top: 4px;">
+                                User ID: <strong>#<%= player.Id %></strong> &bull; 
+                                Cuenta: <strong><%= player.Username %></strong> &bull; 
+                                IP: <strong><%= player.IP %></strong> &bull; 
+                                Estado: 
+                                <% if (player.IsOnline === 1) { %>
+                                    <span style="color: var(--success); font-weight: 600;">En línea (Online)</span>
+                                <% } else { %>
+                                    <span>Desconectado</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <a href="/inventory/player/<%= player.Id %>" class="btn btn-primary btn-sm">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                            Ver Inventario (<%= player.inventoryStats.active %>)
+                        </a>
+
+                        <% if (player.IsOnline === 1) { %>
+                            <form action="/players/<%= player.Id %>/kick" method="POST" style="margin: 0;" onsubmit="return confirm('¿Desconectar sesión activa?');">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    Expulsar (Kick)
+                                </button>
+                            </form>
+                        <% } %>
+
+                        <form action="/players/<%= player.Id %>/mute" method="POST" style="margin: 0;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="is_muted" value="<%= player.is_muted === '1' ? '0' : '1' %>">
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                <%= player.is_muted === '1' ? 'Desmutear Chat' : 'Mutear Chat' %>
+                            </button>
+                        </form>
+
+                        <% if (player.banned === 1) { %>
+                            <form action="/moderation/unban" method="POST" style="margin: 0;" onsubmit="return confirm('¿Desbanear cuenta?');">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="userId" value="<%= player.Id %>">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Desbanear Cuenta
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Stats Overview Cards -->
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon gold">💰</div>
+                        <div class="stat-content">
+                            <div class="stat-title">Oro (Gold)</div>
+                            <div class="stat-value" style="color: var(--gold);"><%= Number(player.gold).toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">💵</div>
+                        <div class="stat-content">
+                            <div class="stat-title">Cash</div>
+                            <div class="stat-value" style="color: #34d399;"><%= Number(player.cash).toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon blue">⚡</div>
+                        <div class="stat-content">
+                            <div class="stat-title">Puntos GP</div>
+                            <div class="stat-value" style="color: #60a5fa;"><%= Number(player.gp).toLocaleString() %></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon purple">🏆</div>
+                        <div class="stat-content">
+                            <div class="stat-title">Partidas (Win / Loss)</div>
+                            <div class="stat-value">
+                                <%= player.win %>W / <%= player.loss %>L
+                                <% const totalG = (player.win || 0) + (player.loss || 0); %>
+                                <span style="font-size: 12px; color: var(--text-dim); margin-left: 6px;">
+                                    (<%= totalG > 0 ? Math.round((player.win / totalG) * 100) : 0 %>%)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Settings Grid -->
+                <div class="form-grid-2">
+                    <!-- Column 1: Profile Information -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Información del Perfil
+                        </h3>
+
+                        <form action="/players/<%= player.Id %>/edit" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Game ID (Nickname visible)</label>
+                                <input type="text" name="game_id" class="form-control" value="<%= player.game_id %>" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Correo Electrónico (Email)</label>
+                                <input type="email" name="email" class="form-control" value="<%= player.Email || '' %>" placeholder="correo@ejemplo.com">
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Género</label>
+                                    <select name="gender" class="form-control">
+                                        <option value="m" <%= player.gender === 'm' ? 'selected' : '' %>>Hombre (M)</option>
+                                        <option value="f" <%= player.gender === 'f' ? 'selected' : '' %>>Mujer (F)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">País (Código ISO 2)</label>
+                                    <input type="text" name="country" class="form-control" value="<%= player.country || 'PE' %>" maxlength="4">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Power User</label>
+                                <select name="power_user" class="form-control">
+                                    <option value="0" <%= player.power_user === 0 ? 'selected' : '' %>>Desactivado (0)</option>
+                                    <option value="1" <%= player.power_user === 1 ? 'selected' : '' %>>Activo (1)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Guardar Información de Perfil
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column 2: Rank & Permissions -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            Rango & Privilegios GM
+                        </h3>
+
+                        <form action="/players/<%= player.Id %>/rank" method="POST" style="margin-bottom: 24px;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Cambiar Rango Visual</label>
+                                <select name="rank" class="form-control" style="margin-bottom: 12px;">
+                                    <% Object.keys(ranks).forEach(r => { %>
+                                        <option value="<%= r %>" <%= player.rank == r ? 'selected' : '' %>><%= ranks[r].name %></option>
+                                    <% }); %>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning" style="width: 100%;">
+                                Actualizar Rango
+                            </button>
+                        </form>
+
+                        <form action="/players/<%= player.Id %>/gm" method="POST" style="margin-bottom: 24px;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Privilegios Game Master (GM Flag)</label>
+                                <select name="gm" class="form-control" style="margin-bottom: 12px;">
+                                    <option value="0" <%= player.gm === 0 ? 'selected' : '' %>>Jugador Regular (GM = 0)</option>
+                                    <option value="1" <%= player.gm === 1 ? 'selected' : '' %>>Game Master Activo (GM = 1)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                                Alternar Estado GM
+                            </button>
+                        </form>
+
+                        <form action="/players/<%= player.Id %>/password" method="POST" onsubmit="return confirm('¿Estás seguro de restablecer la contraseña?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Restablecer Contraseña de la Cuenta</label>
+                                <input type="text" name="password" class="form-control" placeholder="Nueva contraseña segura..." required style="margin-bottom: 12px;">
+                            </div>
+
+                            <button type="submit" class="btn btn-danger" style="width: 100%;">
+                                Cambiar Contraseña
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Column: Quick Economy Recharge -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Ajuste Rápido de Economía
+                    </h3>
+
+                    <form action="/economy/modify" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="userId" value="<%= player.Id %>">
+
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Recurso</label>
+                                <select name="type" class="form-control">
+                                    <option value="gold">Oro (Gold)</option>
+                                    <option value="cash" selected>Cash</option>
+                                    <option value="gp">Puntos GP</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Operación</label>
+                                <select name="operation" class="form-control">
+                                    <option value="add">Sumar (+)</option>
+                                    <option value="subtract">Restar (-)</option>
+                                    <option value="set">Fijar exactamente (=)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Monto</label>
+                                <input type="number" name="amount" class="form-control" placeholder="Ej. 50000" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Motivo / Razón (para el log de auditoría)</label>
+                            <input type="text" name="reason" class="form-control" placeholder="Ej. Bonificación de evento, compensación, etc.">
+                        </div>
+
+                        <button type="submit" class="btn btn-success" style="width: 100%;">
+                            Aplicar Transacción Económica
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Sanctions & Bans History -->
+                <div class="card-table">
+                    <div class="table-header">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Historial de Sanciones y Baneos</h3>
+                        <% if (player.banned !== 1) { %>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('ban-modal').style.display='block'">
+                                Banear Jugador
+                            </button>
+                        <% } %>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Razón del Baneo</th>
+                                <th>Duración / Vencimiento</th>
+                                <th>GM Sancionador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (player.bans && player.bans.length > 0) { %>
+                                <% player.bans.forEach(b => { %>
+                                    <tr>
+                                        <td>#<%= b.Id %></td>
+                                        <td><span style="color: #fca5a5;"><%= b.razon %></span></td>
+                                        <td>
+                                            <% if (b.date === 'Forever') { %>
+                                                <span class="role-badge" style="background:#ef4444; color:#fff;">Permanente</span>
+                                            <% } else { %>
+                                                <span>Expira: <%= new Date(parseInt(b.date)).toLocaleDateString('es-ES') %></span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= b.gm %> (ID: <%= b.gm_id %>)</td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-dim); padding: 20px;">
+                                        Este jugador no tiene sanciones ni baneos registrados.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Ban Modal Dialog -->
+                <div id="ban-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 12px; max-width: 480px; width: 90%; margin: 100px auto; padding: 28px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: #f87171; margin-bottom: 16px;">
+                            Aplicar Sanción / Ban a <%= player.game_id %>
+                        </h3>
+
+                        <form action="/moderation/ban" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="userId" value="<%= player.Id %>">
+
+                            <div class="form-group">
+                                <label class="form-label">Motivo del Baneo</label>
+                                <input type="text" name="reason" class="form-control" placeholder="Ej. Uso de hacks, toxicidad, insultos..." required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Duración</label>
+                                <select name="duration" class="form-control">
+                                    <option value="1">1 Día</option>
+                                    <option value="3">3 Días</option>
+                                    <option value="7">7 Días</option>
+                                    <option value="30">30 Días</option>
+                                    <option value="90">90 Días</option>
+                                    <option value="Forever" selected>Permanente (Forever)</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 24px;">
+                                <button type="submit" class="btn btn-danger" style="flex: 1;">Confirmar Baneo</button>
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('ban-modal').style.display='none'">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+
+            <%- include('../layouts/footer') %>
+        </div>
+    </div>
+</body>
+</html>

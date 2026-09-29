@@ -1,0 +1,23 @@
+{
+  "name": "dragonbound-admin",
+  "version": "1.0.0",
+  "description": "DragonBound Official Administrative Panel",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-mysql-session": "^3.0.3",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "mysql2": "^3.12.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
