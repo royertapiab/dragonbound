@@ -146,11 +146,30 @@ module.exports = Map = cls.Class.extend({
                 self.h = this.height;
                 self.data = this.data;
                 //Logger.debug("LoadMap: " + self.id);
-                callback();
+                callback && callback();
             })
             .on('error', function () {
                 Logger.error("Map Error: " + self.id);
             });
+    },
+
+    loadMapSync: function () {
+        var self = this;
+        try {
+            var file = __dirname + '/maps/map' + self.id + '.png';
+            if (fs.existsSync(file)) {
+                var buf = fs.readFileSync(file);
+                var png = PNG.sync.read(buf);
+                self.w = png.width;
+                self.h = png.height;
+                self.data = png.data;
+                self.LoadPoints();
+                return true;
+            }
+        } catch (e) {
+            Logger.error("Map Sync Error " + self.id + ": " + e.message);
+        }
+        return false;
     },
 
     RadToAngle: function (a) {

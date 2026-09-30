@@ -4,7 +4,7 @@ var Types = require('../gametypes');
 var Logger = require('./logger');
 var Map = require('./map');
 
-module.exports = MapController = cls.Class.extend({
+var MapController = cls.Class.extend({
     init: function (load) {
         var self = this;
         self.maps = {};
@@ -325,14 +325,28 @@ module.exports = MapController = cls.Class.extend({
     getMap: function (id) {
         var self = this;
         try {
-            if (self.maps[id]) {
-                var basem = this.maps[id];
-                var nmap = new Map(id);
+            var mapId = (id !== null && id !== undefined) ? parseInt(id, 10) : 0;
+            if (isNaN(mapId) || mapId < 0) mapId = 0;
+
+            if (!self.maps[mapId]) {
+                var fallback = new Map(mapId);
+                if (fallback.loadMapSync()) {
+                    self.maps[mapId] = fallback;
+                }
+            }
+
+            if (self.maps[mapId]) {
+                var basem = self.maps[mapId];
+                var nmap = new Map(mapId);
                 nmap.data = self.arrayClone(basem.data);
                 nmap.w = basem.w;
                 nmap.h = basem.h;
                 nmap.points = self.arrayClone(basem.points);
                 return nmap;
+            }
+
+            if (mapId !== 0) {
+                return self.getMap(0);
             }
         } catch (e) {
             Logger.error('err: ' + e.stack);
@@ -340,3 +354,5 @@ module.exports = MapController = cls.Class.extend({
         }
     }
 });
+
+module.exports = MapController;

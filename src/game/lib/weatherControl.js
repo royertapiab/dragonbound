@@ -7,7 +7,7 @@ module.exports = class {
 	constructor(map) {
 		this.#list	= []
 		this.#count	= 0
-		this.#mapw  = map.w
+		this.#mapw  = (map && map.w) ? map.w : 1000;
 		this.active	= []
 		this.current= {}
 		this.client = {

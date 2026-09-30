@@ -7,7 +7,7 @@ var GameServer = require('./game/gameserver');
 var Account = require('./game/account');
 var MapController = require('./game/lib/mapController');
 
-var loadx = process.env.vps === '1' ? false : true;
+var loadx = true;
 var self = this;
 Logger.Init("game.txt");
 this.db = new DataBase();
