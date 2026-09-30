@@ -17872,9 +17872,8 @@
                 this.pendingDecodes = [];
                 var hasUserGesture = !1;
                 this.ensureContext = function(force) {
-                    if (!hasUserGesture && !force && !(navigator.userActivation && navigator.userActivation.hasBeenActive))
+                    if (!hasUserGesture)
                         return null;
-                    hasUserGesture = !0;
                     if (!a.context && AC) {
                         try {
                             a.context = new AC();
@@ -17903,15 +17902,11 @@
                     }
                     return a.context;
                 };
-                if (navigator.userActivation && navigator.userActivation.hasBeenActive) {
+                var unlockAudio = function() {
                     hasUserGesture = !0;
-                    this.ensureContext(!0);
-                } else {
-                    $(document).one("keydown mousedown click touchstart pointerdown", function() {
-                        hasUserGesture = !0;
-                        a.ensureContext(!0);
-                    });
-                }
+                    a.ensureContext(!0);
+                };
+                $(document).one("click keydown mousedown touchstart pointerdown", unlockAudio);
             } else
                 this.volumeSounds = 0;
             void 0 !== document.hidden && document.addEventListener("visibilitychange", function() {
