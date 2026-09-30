@@ -94,8 +94,8 @@ pm2 start ecosystem.config.js
 ## 🔐 Cuentas de Administrador por Defecto
 
 En la base de datos inicial ya están creadas las cuentas maestras:
-- **Owner**: `Destroyer`
-- **Admin**: `1nsane`
+- **Owner**: `Destroyer` (Contraseña: `Abcd#1234`)
+- **Admin**: `1nsane` (Contraseña: `Abcd#1234`)
 
 ---
 
@@ -105,3 +105,12 @@ Si configuras el proxy manualmente:
 - El tráfico web va a `http://127.0.0.1:3000`.
 - El tráfico WebSocket (`/ws/`) va a `http://127.0.0.1:9001/` con headers `Upgrade` y `Connection "upgrade"`.
 - El panel administrativo va a `http://127.0.0.1:3100`.
+
+---
+
+## 👨‍💻 Autoría y Créditos
+
+- **Creado por:** Roger Tapia
+- **Sitio Web:** [www.aljania.com](https://www.aljania.com)
+- **Teléfono / WhatsApp:** 998489530
+

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # DragonBound / GunBound Auto-Installer & Setup Script
+# Creado por Roger Tapia | www.aljania.com | 998489530
 # Designed for Ubuntu 20.04/22.04/24.04 and Debian 11/12
 # ==============================================================================
 
@@ -26,6 +27,7 @@ echo " |____/ |_|   \__,_| \__, | \___/ |_||____/  \___/  \__,_||_| |_| \__,_|"
 echo "                     |___/                                               "
 echo -e "${NC}"
 echo -e "${BOLD}Instalador Automático para DragonBound / GunBound Monorepo${NC}"
+echo -e "${CYAN}Creado por Roger Tapia | www.aljania.com | 998489530${NC}"
 echo -e "${CYAN}===================================================================${NC}"
 echo ""
 
@@ -260,8 +262,13 @@ echo -e "  Password: ${YELLOW}${DB_PASS}${NC}"
 echo -e "  Database: dragonbound"
 echo ""
 echo -e "${BOLD}Cuentas Administrativas Iniciales (en la BD):${NC}"
-echo -e "  👑 Owner:  Destroyer"
-echo -e "  🛡️ Admin:  1nsane"
+echo -e "  👑 Owner:  Destroyer   (Contraseña: Abcd#1234)"
+echo -e "  🛡️ Admin:  1nsane      (Contraseña: Abcd#1234)"
+echo ""
+echo -e "${BOLD}Soporte y Créditos:${NC}"
+echo -e "  👨‍💻 Creado por: Roger Tapia"
+echo -e "  🌐 Web:        www.aljania.com"
+echo -e "  📱 Teléfono:   998489530"
 echo ""
 echo -e "${BOLD}Comandos Útiles de Mantenimiento:${NC}"
 echo -e "  Ver estado de los servicios:   ${YELLOW}pm2 status${NC}"

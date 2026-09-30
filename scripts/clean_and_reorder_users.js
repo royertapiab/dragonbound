@@ -2,6 +2,9 @@
  * Clean all users from the system, leaving only:
  * - Destroyer: Account #1 / User #1 (Admin / OWNER)
  * - 1nsane: Account #2 / User #2 (Admin / ADMIN)
+ * 
+ * Contraseña por defecto: Abcd#1234
+ * Creado por Roger Tapia | www.aljania.com | 998489530
  */
 
 const mysql = require('mysql2/promise');
@@ -54,8 +57,8 @@ async function main() {
         // Step 2: Clean and re-index accounts
         console.log('[+] Cleaning accounts...');
         await conn.query("DELETE FROM accounts WHERE Id NOT IN (?, ?)", [oldDestroAccId, oldInsaneAccId]);
-        await conn.query("UPDATE accounts SET Id = 1, Name = 'Destroyer' WHERE Id = ?", [oldDestroAccId]);
-        await conn.query("UPDATE accounts SET Id = 2, Name = '1nsane' WHERE Id = ?", [oldInsaneAccId]);
+        await conn.query("UPDATE accounts SET Id = 1, Name = 'Destroyer', Password = 'Abcd#1234', Session = MD5('Abcd#1234'), IP = '127.0.0.1' WHERE Id = ?", [oldDestroAccId]);
+        await conn.query("UPDATE accounts SET Id = 2, Name = '1nsane', Password = 'Abcd#1234', Session = MD5('Abcd#1234'), IP = '127.0.0.1' WHERE Id = ?", [oldInsaneAccId]);
         await conn.query("ALTER TABLE accounts AUTO_INCREMENT = 3;");
 
         // Step 3: Clean and re-index users
