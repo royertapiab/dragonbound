@@ -26,12 +26,8 @@ module.exports = class Room {
     constructor(id, title, password, max_players, game_mode, gameserver) {
         var self = this;
         this.id = id;
-        this.max_players = max_players; //2
-        if (process.env.vps === '1' || process.env.vps === '2') {
-            this.game_mode = Types.GAME_MODE.NORMAL;
-        } else {
-            this.game_mode = game_mode; //Types.GAME_MODE.BOSS
-        }
+        this.max_players = max_players;
+        this.game_mode = (typeof game_mode !== 'undefined' && game_mode !== null) ? parseInt(game_mode, 10) : Types.GAME_MODE.NORMAL;
         this.gameserver = gameserver;
         this.title = title;
         this.password = password;
@@ -343,14 +339,17 @@ module.exports = class Room {
                 var rnmap = 0;
                
                 if (self.map == -1) {
-                    mlng = Types.MAPS_PLAY_BOSS.length;
-                    rnmap = self.RandomInt(0, mlng);
-                    self.map = Types.MAPS_PLAY_BOSS[rnmap];
-                } else if (self.map == -1){
-                    self.map = self.rom.map;
-                    //Logger.info("map game: " + self.map);
+                    if (self.game_mode === Types.GAME_MODE.BOSS) {
+                        mlng = Types.MAPS_PLAY_BOSS.length;
+                        rnmap = self.RandomInt(0, mlng);
+                        self.map = Types.MAPS_PLAY_BOSS[rnmap];
+                    } else {
+                        mlng = Types.MAPS_PLAY.length;
+                        rnmap = self.RandomInt(0, mlng);
+                        self.map = Types.MAPS_PLAY[rnmap];
+                    }
                 } else {
-                    if(self.game_mode === Types.GAME_MODE.BOSS) {
+                    if (self.game_mode === Types.GAME_MODE.BOSS) {
                         mlng = Types.MAPS_PLAY_BOSS.length;
                         rnmap = self.RandomInt(0, mlng);
                         self.map = Types.MAPS_PLAY_BOSS[rnmap];
